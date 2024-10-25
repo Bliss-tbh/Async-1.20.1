@@ -4,19 +4,18 @@ about: Report a bug!
 title: ''
 labels: bug
 assignees: MrCubicYT
-
 ---
 
-**Describe the bug**
+**Describe The Bug**
 A clear description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce behavior.
 
-**Expected behavior**
+**Expected Behavior**
 What you expected to happen.
 
-**Desktop (please complete the following information):**
+**Desktop**
 - OS Version
 - Java Version
 
