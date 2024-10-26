@@ -23,5 +23,3 @@ accessible method net/minecraft/server/world/ServerEntityManager entityLeftSecti
 accessible field net/minecraft/server/world/ServerEntityManager handler Lnet/minecraft/world/entity/EntityHandler;
 accessible field net/minecraft/server/world/ServerEntityManager entityUuids Ljava/util/Set;
 accessible field net/minecraft/server/world/ServerEntityManager cache Lnet/minecraft/world/entity/SectionedEntityCache;
-
-accessible class net/minecraft/entity/passive/DolphinEntity$PlayWithItemsGoal

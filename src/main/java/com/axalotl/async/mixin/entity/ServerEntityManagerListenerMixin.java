@@ -8,29 +8,18 @@ import net.minecraft.world.entity.EntityLike;
 import net.minecraft.world.entity.EntityTrackingSection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 @Mixin(ServerEntityManager.Listener.class)
-public abstract class ServerEntityManagerMixin<T extends EntityLike> implements AutoCloseable {
+public abstract class ServerEntityManagerListenerMixin<T extends EntityLike> implements AutoCloseable {
     @Shadow
     private EntityTrackingSection<T> section;
-
-    @WrapMethod(method = "updateEntityPosition")
-    private void updateEntityPosition(Operation<Void> original) {
-        try {
-            original.call();
-        } catch (Throwable ignored) {
-        }
-    }
-
-    @WrapMethod(method = "remove")
-    private void remove(Entity.RemovalReason reason, Operation<Void> original) {
-        try {
-            original.call(reason);
-        } catch (Throwable ignored) {
-        }
-    }
+    @Unique
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @Redirect(method = "updateEntityPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityTrackingSection;remove(Lnet/minecraft/world/entity/EntityLike;)Z"))
     private boolean updateEntityPosition(EntityTrackingSection instance, T entity) {
@@ -41,6 +30,28 @@ public abstract class ServerEntityManagerMixin<T extends EntityLike> implements 
     private boolean remove(EntityTrackingSection instance, T entity) {
         this.section.remove(entity);
         return true;
+    }
+
+    @WrapMethod(method = "updateEntityPosition")
+    private void updateEntityPosition(Operation<Void> original) {
+        lock.lock();
+        try {
+            original.call();
+        } catch (Throwable ignored) {
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @WrapMethod(method = "remove")
+    private void remove(Entity.RemovalReason reason, Operation<Void> original) {
+        lock.lock();
+        try {
+            original.call(reason);
+        } catch (Throwable ignored) {
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

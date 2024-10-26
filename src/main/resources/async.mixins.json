@@ -33,7 +33,7 @@
     "world.SerializingRegionBasedStorageMixin",
     "world.ServerChunkLoadingManagerMixin",
     "world.ServerChunkManagerMixin",
-    "entity.ServerEntityManagerMixin",
+    "entity.ServerEntityManagerListenerMixin",
     "entity.ServerPlayerEntityMixin",
     "world.ServerWorldMixin",
     "world.SimulationDistanceLevelPropagatorMixin",

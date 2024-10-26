@@ -15,9 +15,12 @@ public class GeneralConfig implements ConfigData {
     public boolean disabled = false;
 
     // Parallelism
-    @Comment("Thread count config; In standard mode: will never create more threads than there are CPU threads (as that causeses Context switch churning)\n" +
+    @Comment("#Thread count config; In standard mode: will never create more threads than there are CPU threads (as that causes Context switch churning)\n" +
             "Values <=1 are treated as 'all cores'")
     public int paraMax = -1;
+
+    @Comment("Using Java 21 Virtual Threads")
+    public boolean virtualThreads = false;
 
     @Comment("""
             Other modes for paraMax
@@ -33,7 +36,6 @@ public class GeneralConfig implements ConfigData {
 
     @Comment("Disable tnt entity parallelisation")
     public boolean disableTNT = false;
-
 
     public enum ParaMaxMode {
         Standard,

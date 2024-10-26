@@ -50,5 +50,10 @@
     }
   },
   "suggests": {
+  },
+  "breaks": {
+    "vmp-fabric": "*",
+    "sepals": "*",
+    "moonrise": "*"
   }
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collector;
 
-@Mixin(TypeFilterableList.class)
+@Mixin(value = TypeFilterableList.class, priority = 1500)
 public abstract class TypeFilterableListMixin<T> extends AbstractCollection<T> {
     @Shadow
     @Final

@@ -21,38 +21,24 @@ import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Fully modular filtering
- *
- * @author jediminer543
- */
 public class SerDesRegistry {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Map<Class<?>, ISerDesFilter> EMPTYMAP = new ConcurrentHashMap<>();
     private static final Set<Class<?>> EMPTYSET = ConcurrentHashMap.newKeySet();
 
-    static Map<ISerDesHookType, Map<Class<?>, ISerDesFilter>> optimisedLookup;
-    static Map<ISerDesHookType, Set<Class<?>>> whitelist;
-    static Set<Class<?>> unknown;
-
-    static ArrayList<ISerDesFilter> filters;
-
-    static Set<ISerDesHookType> hookTypes;
-
-    static {
-        filters = new ArrayList<>();
-        optimisedLookup = new ConcurrentHashMap<>();
-        whitelist = new ConcurrentHashMap<>();
-        unknown = ConcurrentHashMap.newKeySet();
-        hookTypes = new HashSet<>();
-        //TODO do an event loop so that this is a thing
-        Collections.addAll(hookTypes, SerDesHookTypes.values());
-    }
+    static Map<ISerDesHookType, Map<Class<?>, ISerDesFilter>> optimisedLookup = new ConcurrentHashMap<>();
+    static Map<ISerDesHookType, Set<Class<?>>> whitelist = new ConcurrentHashMap<>();
+    static Set<Class<?>> unknown = ConcurrentHashMap.newKeySet();
+    static ArrayList<ISerDesFilter> filters = new ArrayList<>();
+    static Set<ISerDesHookType> hookTypes = new HashSet<>();
 
     private static final ISerDesFilter DEFAULT_FILTER = new DefaultFilter();
 
+    static {
+        Collections.addAll(hookTypes, SerDesHookTypes.values());
+    }
+
     public static void init() {
-//        SerDesConfig.loadConfigs();
         initPools();
         initFilters();
         initLookup();
@@ -60,41 +46,30 @@ public class SerDesRegistry {
 
     public static void initFilters() {
         filters.clear();
-        // High Priority (I.e. non overridable)
         filters.add(new VanillaFilter());
-        filters.add(new LegacyFilter()); //TODO kill me
-        // Config loaded
+        filters.add(new LegacyFilter());
         for (SerDesConfig.FilterConfig fpc : SerDesConfig.getFilters()) {
-            ISerDesFilter filter = new GenericConfigFilter(fpc);
-            filters.add(filter);
+            filters.add(new GenericConfigFilter(fpc));
         }
-        // Low priority
         filters.add(AutoFilter.singleton());
         filters.add(DEFAULT_FILTER);
-        for (ISerDesFilter sdf : filters) {
-            sdf.init();
-        }
+        filters.forEach(ISerDesFilter::init);
     }
 
     public static void initLookup() {
         optimisedLookup.clear();
         for (ISerDesFilter f : filters) {
-            Set<Class<?>> rawTgt = f.getTargets();
-            Set<Class<?>> rawWl = f.getWhitelist();
-            if (rawTgt == null) rawTgt = ConcurrentHashMap.newKeySet();
-            if (rawWl == null) rawWl = ConcurrentHashMap.newKeySet();
-            Map<ISerDesHookType, Set<Class<?>>> whitelist = group(rawWl);
+            Set<Class<?>> rawTgt = Optional.ofNullable(f.getTargets()).orElseGet(ConcurrentHashMap::newKeySet);
+            Set<Class<?>> rawWl = Optional.ofNullable(f.getWhitelist()).orElseGet(ConcurrentHashMap::newKeySet);
+            Map<ISerDesHookType, Set<Class<?>>> whitelisted = group(rawWl);
             for (ISerDesHookType sh : hookTypes) {
                 for (Class<?> i : rawTgt) {
                     if (sh.isTargetable(i)) {
-                        optimisedLookup.computeIfAbsent(sh,
-                                k -> new ConcurrentHashMap<>()).put(i, f);
-                        whitelist.computeIfAbsent(sh,
-                                k -> ConcurrentHashMap.newKeySet()).remove(i);
+                        optimisedLookup.computeIfAbsent(sh, k -> new ConcurrentHashMap<>()).put(i, f);
+                        whitelisted.computeIfAbsent(sh, k -> ConcurrentHashMap.newKeySet()).remove(i);
                     }
                 }
-                whitelist.computeIfAbsent(sh,
-                        k -> ConcurrentHashMap.newKeySet()).addAll(rawWl);
+                whitelisted.computeIfAbsent(sh, k -> ConcurrentHashMap.newKeySet()).addAll(rawWl);
             }
         }
     }
@@ -136,54 +111,33 @@ public class SerDesRegistry {
         });
     }
 
-//    public static boolean removeFromWhitelist(ISerDesHookType isdh, Class<?> c) {
-//        return whitelist.getOrDefault(isdh, EMPTYSET).remove(c);
-//    }
-
     public static void initPools() {
         registry.clear();
-        // HARDCODED DEFAULTS
         getOrCreatePool("LEGACY", ChunkLockPool::new);
         getOrCreatePool("SINGLE", SingleExecutionPool::new);
         getOrCreatePool("POST", () -> PostExecutePool.POOL);
-        // LOADED FROM CONFIG
         List<SerDesConfig.PoolConfig> pcl = SerDesConfig.getPools();
-        if (pcl != null) for (SerDesConfig.PoolConfig pc : pcl) {
-            if (!registry.containsKey(pc.getName())) {
-                try {
-                    Class<?> c = Class.forName(pc.getClazz());
-                    Constructor<?> init = c.getConstructor();
-                    Object o = init.newInstance();
-                    if (o instanceof ISerDesPool) {
-                        registry.put(pc.getName(), (ISerDesPool) o);
-                        ((ISerDesPool) o).init(pc.getName(), pc.getInitParams());
+        if (pcl != null) {
+            for (SerDesConfig.PoolConfig pc : pcl) {
+                if (!registry.containsKey(pc.getName())) {
+                    try {
+                        Class<?> c = Class.forName(pc.getClazz());
+                        Constructor<?> init = c.getConstructor();
+                        Object o = init.newInstance();
+                        if (o instanceof ISerDesPool) {
+                            registry.put(pc.getName(), (ISerDesPool) o);
+                            ((ISerDesPool) o).init(pc.getName(), pc.getInitParams());
+                        }
+                    } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                             IllegalAccessException | InvocationTargetException e) {
+                        LOGGER.error("Error initializing pool: {}", pc.getName(), e);
                     }
-                } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException |
-                         IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    e.printStackTrace();
                 }
             }
         }
     }
 
     public static class DefaultFilter implements ISerDesFilter {
-
-        //TODO make not shit
-        public static boolean filterTE(Object tte) {
-            boolean isLocking = BlockEntityLists.teBlackList.contains(tte.getClass());
-            // Apparently a string starts with check is faster than Class.getPackage; who knew (I didn't)
-            if (!isLocking && !tte.getClass().getName().startsWith("net.minecraft.block.entity.")) {
-                isLocking = true;
-            }
-            if (isLocking && BlockEntityLists.teWhiteList.contains(tte.getClass())) {
-                isLocking = false;
-            }
-            if (tte instanceof PistonBlockEntity) {
-                isLocking = true;
-            }
-            return isLocking;
-        }
-
         ISerDesPool clp;
         ISerDesPool.ISerDesOptions config;
 
@@ -205,23 +159,18 @@ public class SerDesRegistry {
                         mode = cm;
                     }
                     if (mode == ClassMode.BLACKLIST) {
-                        optimisedLookup.computeIfAbsent(hookType,
-                                        i -> new ConcurrentHashMap<>())
-                                .put(obj.getClass(), isdf);
+                        optimisedLookup.computeIfAbsent(hookType, i -> new ConcurrentHashMap<>()).put(obj.getClass(), isdf);
                         isdf.serialise(task, obj, bp, w, hookType);
                         return;
                     }
                 }
                 if (mode == ClassMode.WHITELIST) {
-                    whitelist.computeIfAbsent(hookType,
-                                    k -> ConcurrentHashMap.newKeySet())
-                            .add(obj.getClass());
-                    task.run(); // Whitelist = run on thread
+                    whitelist.computeIfAbsent(hookType, k -> ConcurrentHashMap.newKeySet()).add(obj.getClass());
+                    task.run();
                     return;
                 }
                 unknown.add(obj.getClass());
             }
-            // TODO legacy behaviour please fix
             if (hookType.equals(SerDesHookTypes.TETick) && filterTE(obj)) {
                 if (clp == null) {
                     clp = SerDesRegistry.getOrCreatePool("LEGACY", ChunkLockPool::new);
@@ -231,24 +180,22 @@ public class SerDesRegistry {
                 try {
                     task.run();
                 } catch (Exception e) {
-                    LOGGER.error("Exception running {} asynchronusly", obj.getClass().getName(), e);
-                    LOGGER.error("Adding {} to blacklist.", obj.getClass().getName());
-//                    SerDesConfig.createFilterConfig(
-//                            "auto-" + obj.getClass().getName(),
-//                            10,
-//                            Lists.newArrayList(),
-//                            Lists.newArrayList(obj.getClass().getName()),
-//                            null
-//                    );
-
+                    LOGGER.error("Exception running {} asynchronously", obj.getClass().getName(), e);
                     AutoFilter.singleton().addClassToBlacklist(obj.getClass());
-                    // TODO: this could leave a tick in an incomplete state. should the full exception be thrown?
                     if (e instanceof RuntimeException) throw e;
                 }
             }
         }
 
-
+        public static boolean filterTE(Object tte) {
+            boolean isLocking = BlockEntityLists.teBlackList.contains(tte.getClass());
+            if (!isLocking && !tte.getClass().getName().startsWith("net.minecraft.block.entity.")) {
+                isLocking = true;
+            }
+            if (isLocking && BlockEntityLists.teWhiteList.contains(tte.getClass())) {
+                isLocking = false;
+            }
+            return isLocking || tte instanceof PistonBlockEntity;
+        }
     }
 }
-
