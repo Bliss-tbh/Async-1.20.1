@@ -19,9 +19,6 @@ public class GeneralConfig implements ConfigData {
             "Values <=1 are treated as 'all cores'")
     public int paraMax = -1;
 
-    @Comment("Using Java 21 Virtual Threads")
-    public boolean virtualThreads = false;
-
     @Comment("""
             Other modes for paraMax
             Override: Standard but without the CoreCount Ceiling (So you can have 64k threads if you want)

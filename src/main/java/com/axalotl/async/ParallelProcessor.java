@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.lang.Thread;
 
 public class ParallelProcessor {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -48,25 +47,16 @@ public class ParallelProcessor {
     static Map<String, Set<Thread>> mcThreadTracker = new ConcurrentHashMap<>();
 
     public static void setupThreadPool(int parallelism) {
-        if (Async.config.virtualThreads) {
-           ThreadFactory factory = Thread.ofVirtual()
-                    .name("Async-Tick-Pool-Thread-", 0)
-                    .uncaughtExceptionHandler((thread, throwable) ->
-                            LOGGER.error("Error in virtual thread {}: {}", thread.getName(), throwable))
-                    .factory();
-           tickPool = Executors.newThreadPerTaskExecutor(factory);
-        } else {
-            final ClassLoader cl = Async.class.getClassLoader();
-            ForkJoinPool.ForkJoinWorkerThreadFactory tickThreadFactory = p -> {
-                ForkJoinWorkerThread fjwt = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(p);
-                fjwt.setName("Async-Tick-Pool-Thread-" + ThreadPoolID.getAndIncrement());
-                regThread("Async-Tick", fjwt);
-                fjwt.setDaemon(true);
-                fjwt.setContextClassLoader(cl);
-                return fjwt;
-            };
-            tickPool = new ForkJoinPool(parallelism, tickThreadFactory, (t, e) -> LOGGER.error("Error on create Async tickPool", e), true);
-        }
+        final ClassLoader cl = Async.class.getClassLoader();
+        ForkJoinPool.ForkJoinWorkerThreadFactory tickThreadFactory = p -> {
+            ForkJoinWorkerThread fjwt = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(p);
+            fjwt.setName("Async-Tick-Pool-Thread-" + ThreadPoolID.getAndIncrement());
+            regThread("Async-Tick", fjwt);
+            fjwt.setDaemon(true);
+            fjwt.setContextClassLoader(cl);
+            return fjwt;
+        };
+        tickPool = new ForkJoinPool(parallelism, tickThreadFactory, (t, e) -> LOGGER.error("Error on create Async tickPool", e), true);
     }
 
 
