@@ -30,7 +30,6 @@ import org.spongepowered.asm.mixin.Mixin;
                 "it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap$MapIterator",
                 "it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap",
                 "it.unimi.dsi.fastutil.objects.ReferenceArrayList",
-                "it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet$SetIterator",
                 "it.unimi.dsi.fastutil.objects.Object2ReferenceOpenCustomHashMap",
                 "it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap",
                 "it.unimi.dsi.fastutil.ints.IntArrayList",

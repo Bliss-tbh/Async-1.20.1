@@ -7,7 +7,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.vehicle.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -89,10 +88,7 @@ public class ParallelProcessor {
     }
 
     private static boolean tickPortalSynchronously(Entity entity) {
-        if (entity.portalManager != null && entity.portalManager.isInPortal()) {
-            return true;
-        }
-        return entity instanceof ProjectileEntity;
+        return entity.portalManager != null && entity.portalManager.isInPortal();
     }
 
 

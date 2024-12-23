@@ -7,6 +7,7 @@ import net.minecraft.entity.ai.pathing.PathMinHeap;
 import net.minecraft.util.collection.TypeFilterableList;
 import net.minecraft.util.math.random.CheckedRandom;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.chunk.PalettedContainer;
 import net.minecraft.world.chunk.light.LevelPropagator;
 import net.minecraft.world.entity.EntityTrackingSection;
 import net.minecraft.world.event.listener.SimpleGameEventDispatcher;
@@ -25,7 +26,8 @@ import org.spongepowered.asm.mixin.Mixin;
         WardenAngerManager.class,
         WorldBorder.class,
         EntityTrackingSection.class,
-        TypeFilterableList.class
+        TypeFilterableList.class,
+        PalettedContainer.class
 })
 public class SyncAllMixin {
 }

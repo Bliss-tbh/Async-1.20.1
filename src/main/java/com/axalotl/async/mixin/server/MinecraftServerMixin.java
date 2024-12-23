@@ -9,11 +9,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.function.BooleanSupplier;
 
 @Mixin(value = MinecraftServer.class, priority = Integer.MAX_VALUE)
 public abstract class MinecraftServerMixin extends ReentrantThreadExecutor<ServerTask> implements CommandOutput, AutoCloseable {
@@ -39,11 +35,6 @@ public abstract class MinecraftServerMixin extends ReentrantThreadExecutor<Serve
             return true;
         }
         return getThreadThread == serverThread;
-    }
-
-    @Inject(method = "tick", at = @At("HEAD"))
-    private void getServerObject(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-        ParallelProcessor.setServer((MinecraftServer) (Object) this);
     }
 }
 
