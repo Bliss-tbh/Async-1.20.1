@@ -66,7 +66,7 @@ public abstract class ServerWorldMixin implements StructureWorldAccess {
         return syncedBlockEventQueue.addAll(c);
     }
 
-    //@Redirect(method = "updateListeners", at = @At(value = "FIELD", target = "Lnet/minecraft/server/world/ServerWorld;duringListenerUpdate:Z", opcode = Opcodes.PUTFIELD))
-    //private void skipSendBlockUpdatedCheck(ServerWorld instance, boolean value) {
-    //}
+    @Redirect(method = "updateListeners", at = @At(value = "FIELD", target = "Lnet/minecraft/server/world/ServerWorld;duringListenerUpdate:Z", opcode = Opcodes.PUTFIELD))
+    private void skipSendBlockUpdatedCheck(ServerWorld instance, boolean value) {
+    }
 }
