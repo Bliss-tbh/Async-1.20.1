@@ -18,6 +18,6 @@ public class DedicatedServerWatchdogMixin {
     @Inject(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/Bootstrap;println(Ljava/lang/String;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void addCustomCrashReport(CallbackInfo ci, long l, long m, long n, ThreadMXBean threadMXBean, ThreadInfo[] threadInfos, StringBuilder stringBuilder, Error error, CrashReport crashReport, CrashReportSection crashReportSection, CrashReportSection crashReportSection2) {
         CrashReportSection AsyncSection = crashReport.addElement("Async");
-        AsyncSection.add("currentEnts", () -> ParallelProcessor.currentEnts.toString());
+        AsyncSection.add("currentEntities", () -> ParallelProcessor.currentEntities.toString());
     }
 }

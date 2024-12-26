@@ -16,12 +16,10 @@ public class RaiderEntityMixin {
 
     @WrapMethod(method = "loot")
     private void loot(ItemEntity item, Operation<Void> original) {
-        lock.lock();
-        try {
-            if (!item.isRemoved() && item.getEntityWorld() != null)
+        synchronized (lock) {
+            if (!item.isRemoved() && item.getEntityWorld() != null) {
                 original.call(item);
-        } finally {
-            lock.unlock();
+            }
         }
     }
 }

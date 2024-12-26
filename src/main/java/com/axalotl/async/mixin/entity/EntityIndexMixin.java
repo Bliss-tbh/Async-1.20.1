@@ -26,12 +26,12 @@ public abstract class EntityIndexMixin<T extends EntityLike> {
     @Shadow
     @Final
     @Mutable
-    private Map<UUID, T> uuidToEntity = ConcurrentCollections.newHashMap();
+    private Map<UUID, T> uuidToEntity;
 
     @Inject(method = "<init>",at = @At("TAIL"))
     private void replaceConVars(CallbackInfo ci)
     {
         idToEntity = new Int2ObjectConcurrentHashMap<>();
+        uuidToEntity = ConcurrentCollections.newHashMap();
     }
-
 }

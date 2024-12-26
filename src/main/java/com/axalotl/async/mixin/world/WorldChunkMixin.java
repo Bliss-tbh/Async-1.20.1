@@ -1,32 +1,33 @@
 package com.axalotl.async.mixin.world;
 
+import com.axalotl.async.parallelised.fastutil.Int2ObjectConcurrentHashMap;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.event.listener.GameEventDispatcher;
-import net.minecraft.world.event.listener.SimpleGameEventDispatcher;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldChunk.class)
 public abstract class WorldChunkMixin {
+    @Mutable
     @Shadow
-    protected abstract void removeGameEventDispatcher(int ySectionCoord);
+    @Final
+    private Int2ObjectMap<GameEventDispatcher> gameEventDispatchers;
 
-    @Shadow public abstract World getWorld();
-
-    @Shadow @Final
-    World world;
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    private void init(CallbackInfo ci) {
+        gameEventDispatchers = new Int2ObjectConcurrentHashMap<>();
+    }
 
     @WrapMethod(method = "getGameEventDispatcher")
     private synchronized GameEventDispatcher getGameEventDispatcher(int ySectionCoord, Operation<GameEventDispatcher> original) {
-        GameEventDispatcher dispatcher = original.call(ySectionCoord);
-        if (dispatcher == null && this.world instanceof ServerWorld serverWorld) {
-            return new SimpleGameEventDispatcher(serverWorld, ySectionCoord, this::removeGameEventDispatcher);
-        }
-        return dispatcher;
+        return original.call(ySectionCoord);
     }
 }

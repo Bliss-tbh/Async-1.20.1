@@ -18,16 +18,24 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class SynchronisePlugin implements IMixinConfigPlugin {
-    private static final Logger syncLogger = LogManager.getLogger();
-    private final Multimap<String, String> mixin2MethodsMap = ArrayListMultimap.create();
-    private final Multimap<String, String> mixin2MethodsExcludeMap = ArrayListMultimap.create();
-    private final TreeSet<String> syncAllSet = new TreeSet<>();
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final Multimap<String, String> methodsToSynchronize = ArrayListMultimap.create();
+    private final Multimap<String, String> methodsToExclude = ArrayListMultimap.create();
+    private final Set<String> syncAllClasses = new TreeSet<>();
 
     @Override
     public void onLoad(String mixinPackage) {
         MappingResolver mappingResolver = FabricLoader.getInstance().getMappingResolver();
-        mixin2MethodsExcludeMap.put("com.axalotl.async.mixin.utils.SyncAllMixin", mappingResolver.mapMethodName("intermediary", "net.minecraft.class_2806", "method_12165", "()V"));
-        syncAllSet.add("com.axalotl.async.mixin.utils.SyncAllMixin");
+
+        methodsToExclude.put(
+                "com.axalotl.async.mixin.utils.SyncAllMixin",
+                mappingResolver.mapMethodName("intermediary", "net.minecraft.class_2806", "method_12165", "()V")
+        );
+
+        syncAllClasses.addAll(List.of(
+                "com.axalotl.async.mixin.utils.FastUtilsMixin",
+                "com.axalotl.async.mixin.utils.SyncAllMixin"
+        ));
     }
 
     @Override
@@ -55,26 +63,39 @@ public class SynchronisePlugin implements IMixinConfigPlugin {
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-        Collection<String> targetMethods = mixin2MethodsMap.get(mixinClassName);
-        Collection<String> excludedMethods = mixin2MethodsExcludeMap.get(mixinClassName);
+        Collection<String> targetMethods = methodsToSynchronize.get(mixinClassName);
+        Collection<String> excludedMethods = methodsToExclude.get(mixinClassName);
 
         if (!targetMethods.isEmpty()) {
-            for (MethodNode method : targetClass.methods) {
-                for (String targetMethod : targetMethods)
-                    if (method.name.equals(targetMethod)) {
-                        method.access |= Opcodes.ACC_SYNCHRONIZED;
-                        syncLogger.info("Setting synchronize bit for " + method.name + " in " + targetClassName + ".");
-                    }
-            }
-        } else if (syncAllSet.contains(mixinClassName)) {
-            int negFilter = Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_NATIVE | Opcodes.ACC_ABSTRACT | Opcodes.ACC_BRIDGE;
+            synchronizeSpecificMethods(targetClassName, targetClass, targetMethods);
+        } else if (syncAllClasses.contains(mixinClassName)) {
+            synchronizeAllApplicableMethods(targetClassName, targetClass, excludedMethods);
+        }
+    }
 
-            for (MethodNode method : targetClass.methods) {
-                if ((method.access & negFilter) == 0 && !method.name.equals("<init>") && !excludedMethods.contains(method.name)) {
-                    method.access |= Opcodes.ACC_SYNCHRONIZED;
-                    syncLogger.info("Setting synchronize bit for " + method.name + " in " + targetClassName + ".");
-                }
+    private void synchronizeSpecificMethods(String className, ClassNode classNode, Collection<String> methods) {
+        for (MethodNode method : classNode.methods) {
+            if (methods.contains(method.name)) {
+                method.access |= Opcodes.ACC_SYNCHRONIZED;
+                logSynchronization(method.name, className);
             }
         }
+    }
+
+    private void synchronizeAllApplicableMethods(String className, ClassNode classNode, Collection<String> excludedMethods) {
+        final int filter = Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC | Opcodes.ACC_NATIVE | Opcodes.ACC_ABSTRACT | Opcodes.ACC_BRIDGE;
+
+        for (MethodNode method : classNode.methods) {
+            if ((method.access & filter) == 0
+                    && !"<init>".equals(method.name)
+                    && !excludedMethods.contains(method.name)) {
+                method.access |= Opcodes.ACC_SYNCHRONIZED;
+                logSynchronization(method.name, className);
+            }
+        }
+    }
+
+    private void logSynchronization(String methodName, String className) {
+        LOGGER.debug("Synchronized method: {} in {}", methodName, className);
     }
 }

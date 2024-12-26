@@ -3,7 +3,7 @@
   "id": "async",
   "version": "${version}",
   "name": "Async",
-  "description": "Async - Minecraft Entity Multi-Threading Mod, Now for 1.20.1!",
+  "description": "Async - Minecraft Entity Multi-Threading Mod, Now for 1.20.1",
   "authors": [
     "Grider",
     "AxalotL",
@@ -18,15 +18,10 @@
   "icon": "assets/async/icon.png",
   "environment": "*",
   "entrypoints": {
-    "preLaunch": [
-      "com.axalotl.async.parallelised.fastutil.sync.SyncFuTransformer"
-    ],
     "main": [
       "com.axalotl.async.Async"
     ],
     "mixinsquared": [
-      "com.axalotl.async.mixin.c2me.AsyncChunkAccessMixinCanceller",
-      "com.axalotl.async.mixin.c2me.AsyncGeneralFixesMixinCanceller"
     ]
   },
   "accessWidener": "async.accesswidener",
@@ -34,26 +29,21 @@
     "async.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.11.3",
+    "fabricloader": "*",
     "fabric": "*",
     "minecraft": "1.20.1",
-    "java": ">=17",
-    "cloth-config2": ">=5.0.34"
+    "java": ">=17"
   },
   "custom": {
     "lithium:options": {
-      "world.chunk_access": false,
-      "entity": false,
-      "collections": false,
-      "alloc.entity_tracker": false,
-      "world.game_events": false
+      "entity.inactive_navigations": false,
+      "experimental.entity.item_entity_merging": false,
+      "entity.collisions.unpushable_cramming": false
     }
   },
   "suggests": {
   },
   "breaks": {
-    "vmp-fabric": "*",
-    "sepals": "*",
     "moonrise": "*"
   }
 }

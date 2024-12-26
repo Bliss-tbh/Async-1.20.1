@@ -1,10 +1,8 @@
 package com.axalotl.async.mixin.c2me;
 
 import com.axalotl.async.ParallelProcessor;
-import com.axalotl.async.parallelised.ParaServerChunkProvider;
 import com.ishland.c2me.fixes.worldgen.threading_issues.common.CheckedThreadLocalRandom;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.util.math.random.LocalRandom;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
