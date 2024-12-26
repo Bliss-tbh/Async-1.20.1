@@ -1,6 +1,7 @@
 package com.axalotl.async;
 
 import com.axalotl.async.config.AsyncConfig;
+import com.axalotl.async.parallelised.ConcurrentCollections;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
@@ -29,7 +30,7 @@ public class ParallelProcessor {
     private static ExecutorService tickPool;
     private static final Queue<CompletableFuture<Void>> taskQueue = new ConcurrentLinkedQueue<>();
     public static final Set<UUID> blacklistedEntity = ConcurrentHashMap.newKeySet();
-    private static final Map<String, Set<Thread>> mcThreadTracker = new ConcurrentHashMap<>();
+    private static final Map<String, Set<Thread>> mcThreadTracker = ConcurrentCollections.newHashMap();
     public static final Set<Class<?>> specialEntities = Set.of(
             FallingBlockEntity.class,
             PlayerEntity.class,
@@ -65,16 +66,20 @@ public class ParallelProcessor {
         if (shouldTickSynchronously(entity)) {
             tickSynchronously(tickConsumer, entity);
         } else {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(
-                    () -> performAsyncEntityTick(tickConsumer, entity),
-                    tickPool
-            ).exceptionally(e -> {
-                LOGGER.error("Error ticking entity {} asynchronously, switching to synchronous processing", entity.getType().getName(), e);
-                tickSynchronously(tickConsumer, entity);
-                blacklistedEntity.add(entity.getUuid());
-                return null;
-            });
-            taskQueue.add(future);
+            try {
+                CompletableFuture<Void> future = CompletableFuture.runAsync(
+                        () -> performAsyncEntityTick(tickConsumer, entity),
+                        tickPool
+                ).exceptionally(e -> {
+                    LOGGER.error("Error ticking entity {} asynchronously, switching to synchronous processing", entity, e);
+                    tickSynchronously(tickConsumer, entity);
+                    blacklistedEntity.add(entity.getUuid());
+                    return null;
+                });
+                taskQueue.add(future);
+            } catch (Exception e) {
+                throw new RuntimeException("erm entity bug", e);
+            }
         }
     }
 

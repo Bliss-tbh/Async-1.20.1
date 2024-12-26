@@ -5,17 +5,26 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerEntityManager;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 @Mixin(ServerEntityManager.Listener.class)
 public abstract class ServerEntityManagerListenerMixin implements AutoCloseable {
+    @Unique
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @WrapMethod(method = "updateEntityPosition")
-    private synchronized void updateEntityPosition(Operation<Void> original) {
-        original.call();
+    private void updateEntityPosition(Operation<Void> original) {
+        synchronized (lock) {
+            original.call();
+        }
     }
 
     @WrapMethod(method = "remove")
-    private synchronized void remove(Entity.RemovalReason reason, Operation<Void> original) {
-        original.call(reason);
+    private void remove(Entity.RemovalReason reason, Operation<Void> original) {
+        synchronized (lock) {
+            original.call(reason);
+        }
     }
 }
