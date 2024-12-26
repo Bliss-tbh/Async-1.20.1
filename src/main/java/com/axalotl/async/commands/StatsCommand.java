@@ -116,7 +116,19 @@ public class StatsCommand {
             return;
         }
 
-        statsThread = new Thread(StatsCommand::run, "Async-Stats-Thread");
+        statsThread = new Thread(() -> {
+            while (isRunning && !Thread.currentThread().isInterrupted()) {
+                try {
+                    updateStats();
+                    Thread.sleep(SAMPLING_INTERVAL_MS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "Async-Stats-Thread");
 
         statsThread.setDaemon(true);
         statsThread.start();
@@ -145,20 +157,6 @@ public class StatsCommand {
         isRunning = false;
         if (statsThread != null) {
             statsThread.interrupt();
-        }
-    }
-
-    private static void run() {
-        while (isRunning && !Thread.currentThread().isInterrupted()) {
-            try {
-                updateStats();
-                Thread.sleep(SAMPLING_INTERVAL_MS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 }
