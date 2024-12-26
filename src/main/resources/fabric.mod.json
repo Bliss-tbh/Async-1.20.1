@@ -22,6 +22,8 @@
       "com.axalotl.async.Async"
     ],
     "mixinsquared": [
+      "com.axalotl.async.mixin.c2me.AsyncChunkAccessMixinCanceller",
+      "com.axalotl.async.mixin.c2me.AsyncGeneralFixesMixinCanceller"
     ]
   },
   "accessWidener": "async.accesswidener",
