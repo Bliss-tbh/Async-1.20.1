@@ -29,14 +29,15 @@ public abstract class CheckedThreadLocalRandomMixin extends LocalRandom {
     @Inject(method = "isSafe", at = @org.spongepowered.asm.mixin.injection.At("HEAD"), cancellable = true)
     public void isSafe(CallbackInfoReturnable<Boolean> cir) {
         MinecraftServer server = ParallelProcessor.getServer();
-        Thread owner = this.owner != null ? this.owner.get() : null;
-        boolean notOwner = false;
-        if (server != null) {
-            notOwner = owner != null && (server.isOnThread() ? owner : Thread.currentThread()) != owner;
-        } else {
+        if (server == null) {
             cir.setReturnValue(true);
+            return;
         }
-        if (notOwner) {
+
+        Thread currentOwner = owner != null ? owner.get() : null;
+        Thread expectedOwner = server.isOnThread() ? currentOwner : Thread.currentThread();
+
+        if (currentOwner != null && currentOwner != expectedOwner) {
             handleNotOwner();
             cir.setReturnValue(false);
         } else {

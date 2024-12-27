@@ -3,7 +3,6 @@ package com.axalotl.async.mixin.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.ai.brain.sensor.NearestItemsSensor;
-import net.minecraft.entity.ai.brain.sensor.Sensor;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
@@ -17,7 +16,7 @@ import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
 @Mixin(NearestItemsSensor.class)
-public abstract class NearestItemsSensorMixin extends Sensor<MobEntity> {
+public class NearestItemsSensorMixin {
 
     @Redirect(method = "sense(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/mob/MobEntity;)V",
             at = @At(value = "INVOKE", target = "Ljava/util/Comparator;comparingDouble(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;"))

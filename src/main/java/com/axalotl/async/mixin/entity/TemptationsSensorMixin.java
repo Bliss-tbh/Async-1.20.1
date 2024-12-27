@@ -17,6 +17,7 @@ import java.util.function.ToDoubleFunction;
 
 @Mixin(TemptationsSensor.class)
 public class TemptationsSensorMixin {
+
     @Redirect(method = "sense(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/mob/PathAwareEntity;)V", at = @At(value = "INVOKE", target = "Ljava/util/Comparator;comparingDouble(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;"))
     private Comparator<ServerPlayerEntity> sense(ToDoubleFunction<? super ServerPlayerEntity> keyExtractor, ServerWorld world, PathAwareEntity entity) {
         Map<ServerPlayerEntity, Vec3d> positionCache = new HashMap<>();

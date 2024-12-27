@@ -24,6 +24,13 @@ public class ConfigCommand {
                     return 1;
                 }))
                 .then(CommandManager.literal("setDisableTNT").requires(cmdSrc -> cmdSrc.hasPermissionLevel(2))
+                        .executes(cmdCtx -> {
+                            boolean currentValue = AsyncConfig.disableTNT;
+                            MutableText message = prefix.copy().append(Text.literal("Current value of disable TNT: ").styled(style -> style.withColor(Formatting.WHITE)))
+                                    .append(Text.literal(String.valueOf(currentValue)).styled(style -> style.withColor(Formatting.GREEN)));
+                            cmdCtx.getSource().sendFeedback(() -> message, false);
+                            return 1;
+                        })
                         .then(CommandManager.argument("value", BoolArgumentType.bool()).executes(cmdCtx -> {
                             boolean value = BoolArgumentType.getBool(cmdCtx, "value");
                             AsyncConfig.disableTNT = value;
@@ -34,6 +41,13 @@ public class ConfigCommand {
                             return 1;
                         })))
                 .then(CommandManager.literal("setEntityMoveSync").requires(cmdSrc -> cmdSrc.hasPermissionLevel(2))
+                        .executes(cmdCtx -> {
+                            boolean currentValue = AsyncConfig.enableEntityMoveSync;
+                            MutableText message = prefix.copy().append(Text.literal("Current value of entity move sync: ").styled(style -> style.withColor(Formatting.WHITE)))
+                                    .append(Text.literal(String.valueOf(currentValue)).styled(style -> style.withColor(Formatting.GREEN)));
+                            cmdCtx.getSource().sendFeedback(() -> message, false);
+                            return 1;
+                        })
                         .then(CommandManager.argument("value", BoolArgumentType.bool()).executes(cmdCtx -> {
                             boolean value = BoolArgumentType.getBool(cmdCtx, "value");
                             AsyncConfig.enableEntityMoveSync = value;

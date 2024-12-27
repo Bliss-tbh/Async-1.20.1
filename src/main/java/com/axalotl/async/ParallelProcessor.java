@@ -9,7 +9,6 @@ import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.vehicle.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +29,7 @@ public class ParallelProcessor {
     public static AtomicInteger currentEntities = new AtomicInteger();
     private static final AtomicInteger ThreadPoolID = new AtomicInteger();
     private static ExecutorService tickPool;
-    private static final ConcurrentLinkedQueue<CompletableFuture<Void>> taskQueue = new ConcurrentLinkedQueue<>();
+    private static final Queue<CompletableFuture<Void>> taskQueue = new ConcurrentLinkedQueue<>();
     public static final Set<UUID> blacklistedEntity = ConcurrentHashMap.newKeySet();
     private static final Map<String, Set<Thread>> mcThreadTracker = ConcurrentCollections.newHashMap();
     public static final Set<Class<?>> specialEntities = Set.of(
@@ -82,8 +81,11 @@ public class ParallelProcessor {
     }
 
     public static boolean shouldTickSynchronously(Entity entity) {
-        return AsyncConfig.disabled || blacklistedEntity.contains(entity.getUuid()) || specialEntities.contains(entity.getClass())
-                || tickPortalSynchronously(entity) || entity instanceof AbstractMinecartEntity
+        return AsyncConfig.disabled
+                || blacklistedEntity.contains(entity.getUuid())
+                || specialEntities.contains(entity.getClass())
+                || tickPortalSynchronously(entity)
+                || entity.hasPlayerRider()
                 || (AsyncConfig.disableTNT && entity instanceof TntEntity);
     }
 

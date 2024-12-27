@@ -20,7 +20,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class StatsCommand {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,##0.##");
     private static final int MAX_SAMPLES = 100;
-    private static final long SAMPLING_INTERVAL_MS = 100;
+    private static final long SAMPLING_INTERVAL_MS = 10;
 
     private static final Queue<Integer> threadSamples = new ConcurrentLinkedQueue<>();
     private static volatile boolean isRunning = true;
@@ -102,13 +102,8 @@ public class StatsCommand {
         if (threadSamples.isEmpty()) {
             return 0.0;
         }
-        int sum = 0;
-        int count = 0;
-        for (Integer sample : threadSamples) {
-            sum += sample;
-            count++;
-        }
-        return count > 0 ? (double) sum / count : 0.0;
+        double sum = threadSamples.stream().mapToDouble(Integer::doubleValue).sum();
+        return sum / threadSamples.size();
     }
 
     public static void runStatsThread() {

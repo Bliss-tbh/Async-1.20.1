@@ -27,9 +27,9 @@ public abstract class EntityMixin {
         }
     }
 
-    //Experimental
-    @WrapMethod(method = "baseTick()V")
-    private void baseTick(Operation<Void> original) {
+    //tickBlockCollision is simpler on 1.20.1
+    @WrapMethod(method = "checkBlockCollision()V")
+    private void checkBlockCollision(Operation<Void> original) {
         if (AsyncConfig.enableEntityMoveSync) {
             synchronized (lock) {
                 original.call();
