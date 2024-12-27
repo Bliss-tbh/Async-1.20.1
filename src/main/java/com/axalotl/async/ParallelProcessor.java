@@ -88,7 +88,7 @@ public class ParallelProcessor {
     }
 
     private static boolean tickPortalSynchronously(Entity entity) {
-        if (entity.portalManager != null && entity.portalManager.isInPortal()) {
+        if (entity.inNetherPortal) {
             return true;
         }
         return entity instanceof ProjectileEntity;

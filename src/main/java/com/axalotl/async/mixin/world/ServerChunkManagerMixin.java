@@ -1,5 +1,6 @@
 package com.axalotl.async.mixin.world;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.server.world.*;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.*;
@@ -23,34 +24,45 @@ public abstract class ServerChunkManagerMixin extends ChunkManager {
     @Shadow
     public abstract @Nullable ChunkHolder getChunkHolder(long pos);
 
-    @Shadow
-    @Final
-    public ServerChunkLoadingManager chunkLoadingManager;
+    //chunkLoadingManager doesn't exist on 1.20.1 and is not necessary
 
-    @Inject(method = "getChunk(IILnet/minecraft/world/chunk/ChunkStatus;Z)Lnet/minecraft/world/chunk/Chunk;", at = @At("HEAD"), cancellable = true)
+    //Experimental
+    @Inject(method = "getChunk(IILnet/minecraft/world/chunk/ChunkStatus;Z)Lnet/minecraft/world/chunk/Chunk;",
+            at = @At("HEAD"), cancellable = true)
     private void shortcutGetChunk(int x, int z, ChunkStatus leastStatus, boolean create, CallbackInfoReturnable<Chunk> cir) {
         if (Thread.currentThread() != this.serverThread) {
             final ChunkHolder holder = this.getChunkHolder(ChunkPos.toLong(x, z));
             if (holder != null) {
-                final CompletableFuture<OptionalChunk<Chunk>> future = holder.load(leastStatus, this.chunkLoadingManager);
-                Chunk chunk = future.getNow(ChunkHolder.UNLOADED).orElse(null);
-                if (chunk instanceof WrapperProtoChunk readOnlyChunk) chunk = readOnlyChunk.getWrappedChunk();
-                if (chunk != null) {
-                    cir.setReturnValue(chunk);
+                final CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> future = holder.getFutureFor(leastStatus);
+                Either<Chunk, ChunkHolder.Unloaded> result = future.getNow(null);
+
+                if (result != null) {
+                    result.ifLeft(chunk -> {
+                        if (chunk instanceof WrapperProtoChunk readOnlyChunk) {
+                            chunk = readOnlyChunk.getWrappedChunk();
+                        }
+                        cir.setReturnValue(chunk);
+                    });
                 }
             }
         }
     }
 
+    //Experimental
     @Inject(method = "getWorldChunk", at = @At("HEAD"), cancellable = true)
     private void shortcutGetWorldChunk(int chunkX, int chunkZ, CallbackInfoReturnable<WorldChunk> cir) {
         if (Thread.currentThread() != this.serverThread) {
             final ChunkHolder holder = this.getChunkHolder(ChunkPos.toLong(chunkX, chunkZ));
             if (holder != null) {
-                final CompletableFuture<OptionalChunk<Chunk>> future = holder.load(ChunkStatus.FULL, this.chunkLoadingManager);
-                Chunk chunk = future.getNow(ChunkHolder.UNLOADED).orElse(null);
-                if (chunk instanceof WorldChunk worldChunk) {
-                    cir.setReturnValue(worldChunk);
+                final CompletableFuture<Either<Chunk, ChunkHolder.Unloaded>> future = holder.getFutureFor(ChunkStatus.FULL);
+                Either<Chunk, ChunkHolder.Unloaded> result = future.getNow(null);
+
+                if (result != null) {
+                    result.ifLeft(chunk -> {
+                        if (chunk instanceof WorldChunk worldChunk) {
+                            cir.setReturnValue(worldChunk);
+                        }
+                    });
                 }
             }
         }

@@ -27,25 +27,15 @@ public abstract class EntityMixin {
         }
     }
 
-    @WrapMethod(method = "tickBlockCollision()V")
-    private void tickBlockCollision(Operation<Void> original) {
+    //Experimental
+    @WrapMethod(method = "baseTick()V")
+    private void baseTick(Operation<Void> original) {
         if (AsyncConfig.enableEntityMoveSync) {
             synchronized (lock) {
                 original.call();
             }
         } else {
             original.call();
-        }
-    }
-
-    @WrapMethod(method = "tickBlockCollision(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)V")
-    private void tickBlockCollision(Vec3d lastRenderPos, Vec3d pos, Operation<Void> original) {
-        if (AsyncConfig.enableEntityMoveSync) {
-            synchronized (lock) {
-                original.call(lastRenderPos, pos);
-            }
-        } else {
-            original.call(lastRenderPos, pos);
         }
     }
 

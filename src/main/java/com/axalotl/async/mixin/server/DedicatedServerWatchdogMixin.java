@@ -10,11 +10,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+
 @Mixin(DedicatedServerWatchdog.class)
 public class DedicatedServerWatchdogMixin {
     @Inject(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/Bootstrap;println(Ljava/lang/String;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void addCustomCrashReportion(CallbackInfo ci, long l, long m, long n, CrashReport crashReport, CrashReportSection crashReportSection) {
+    private void addCustomCrashReport(CallbackInfo ci, long l, long m, long n, ThreadMXBean threadMXBean, ThreadInfo[] threadInfos, StringBuilder stringBuilder, Error error, CrashReport crashReport, CrashReportSection crashReportSection, CrashReportSection crashReportSection2) {
         CrashReportSection AsyncSection = crashReport.addElement("Async");
-        AsyncSection.add("currentEnts", () -> ParallelProcessor.currentEntities.toString());
+        AsyncSection.add("currentEntities", () -> ParallelProcessor.currentEntities.toString());
     }
 }

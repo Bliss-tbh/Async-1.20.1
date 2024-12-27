@@ -12,24 +12,21 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Mixin(SerializingRegionBasedStorage.class)
-public abstract class SerializingRegionBasedStorageMixin<R, P> implements AutoCloseable {
+public abstract class SerializingRegionBasedStorageMixin<R> implements AutoCloseable {
     @Shadow
     @Mutable
     private final Long2ObjectMap<Optional<R>> loadedElements = new Long2ObjectConcurrentHashMap<>();
     @Shadow
     @Mutable
     private final LongLinkedOpenHashSet unsavedElements = new ConcurrentLongLinkedOpenHashSet();
-    @Shadow
-    @Mutable
-    private final Long2ObjectMap<CompletableFuture<Optional<SerializingRegionBasedStorage.LoadResult<P>>>> pendingLoads = new Long2ObjectConcurrentHashMap<>();
-    @Shadow
-    @Mutable
-    private final LongSet loadedChunks = new ConcurrentLongLinkedOpenHashSet();
 
-    @WrapMethod(method = "loadAndWait")
+    //pendingLoads doesn't exist in 1.20.1
+    //loadedChunks doesn't exist in 1.20.1
+
+    //Experimental
+    @WrapMethod(method = "loadDataAt")
     private synchronized void release(ChunkPos chunkPos, Operation<Void> original) {
         original.call(chunkPos);
     }
