@@ -5,7 +5,7 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.List;
 
-public class AsyncModMixinCanceller implements MixinCanceller {
+public class C2MEGTMixinCanceller implements MixinCanceller {
     @Override
     public boolean shouldCancel(List<String> targetClassNames, String mixinClassName) {
         if (FabricLoader.getInstance().isModLoaded("c2me")) {

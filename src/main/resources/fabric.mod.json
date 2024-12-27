@@ -23,7 +23,8 @@
       "com.axalotl.async.Async"
     ],
     "mixinsquared": [
-      "com.axalotl.async.mixin.c2me.AsyncModMixinCanceller"
+      "com.axalotl.async.mixin.c2me.C2MEWTMixinCanceller",
+      "com.axalotl.async.mixin.c2me.C2MEGTMixinCanceller"
     ]
   },
   "accessWidener": "async.accesswidener",
