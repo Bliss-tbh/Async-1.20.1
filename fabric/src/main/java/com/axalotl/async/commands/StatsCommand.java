@@ -1,8 +1,8 @@
 package com.axalotl.async.commands;
 
 import com.axalotl.async.config.AsyncConfig;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.axalotl.async.ParallelProcessor;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
@@ -10,14 +10,15 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.text.DecimalFormat;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.axalotl.async.commands.AsyncCommand.prefix;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class StatsCommand {
+
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,##0.##");
     private static final int MAX_SAMPLES = 100;
     private static final long SAMPLING_INTERVAL_MS = 10;
@@ -138,7 +139,6 @@ public class StatsCommand {
         }
 
         int currentThreads = ParallelProcessor.currentEntities.get();
-
         threadSamples.offer(currentThreads);
 
         while (threadSamples.size() > MAX_SAMPLES) {
