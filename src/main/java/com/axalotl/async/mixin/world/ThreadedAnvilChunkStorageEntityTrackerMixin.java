@@ -6,16 +6,28 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
 
 @Mixin(value = ThreadedAnvilChunkStorage.EntityTracker.class)
 public class ThreadedAnvilChunkStorageEntityTrackerMixin {
 
+    @Mutable
+    @Final
     @Shadow
-    final private Set<ServerPlayNetworkHandler> listeners = ConcurrentCollections.newHashSet();
+    private Set<ServerPlayNetworkHandler> listeners = ConcurrentCollections.newHashSet();
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void init(CallbackInfo ci) {
+        listeners = ConcurrentCollections.newHashSet();
+    }
 
     @WrapMethod(method = "updateTrackedStatus(Lnet/minecraft/server/network/ServerPlayerEntity;)V")
     private synchronized void updateTrackingStatus(ServerPlayerEntity player, Operation<Void> original) {

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
-@Mixin(TemptationsSensor.class)
+@Mixin(value = TemptationsSensor.class, priority = 1500)
 public class TemptationsSensorMixin {
 
     @Redirect(method = "sense(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/mob/PathAwareEntity;)V", at = @At(value = "INVOKE", target = "Ljava/util/Comparator;comparingDouble(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;"))

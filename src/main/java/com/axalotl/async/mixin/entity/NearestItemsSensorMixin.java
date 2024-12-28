@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
-@Mixin(NearestItemsSensor.class)
+@Mixin(value = NearestItemsSensor.class, priority = 1500)
 public class NearestItemsSensorMixin {
 
     @Redirect(method = "sense(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/mob/MobEntity;)V",

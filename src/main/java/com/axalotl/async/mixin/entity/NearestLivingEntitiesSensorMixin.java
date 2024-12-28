@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
-@Mixin(NearestLivingEntitiesSensor.class)
+@Mixin(value = NearestLivingEntitiesSensor.class, priority = 1500)
 public class NearestLivingEntitiesSensorMixin {
 
     @Redirect(method = "sense",
