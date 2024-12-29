@@ -78,7 +78,7 @@ public class AsyncConfig {
     }
 
     public static int getParallelism() {
-        if (paraMax <= 1) return Runtime.getRuntime().availableProcessors();
+        if (paraMax <= 0) return Runtime.getRuntime().availableProcessors();
         return Math.max(1, Math.min(Runtime.getRuntime().availableProcessors(), paraMax));
     }
 }

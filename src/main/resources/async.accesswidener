@@ -18,3 +18,4 @@ accessible class net/minecraft/server/world/ServerEntityManager$Listener
 accessible class net/minecraft/village/VillagerGossips$Reputation
 accessible field net/minecraft/server/world/ServerWorld entityList Lnet/minecraft/world/EntityList;
 accessible class net/minecraft/server/world/ServerEntityManager$Status
+accessible class net/minecraft/server/world/ServerWorld$ServerEntityHandler
