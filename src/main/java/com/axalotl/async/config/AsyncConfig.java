@@ -22,6 +22,7 @@ public class AsyncConfig {
     public static int paraMax = -1;
     public static boolean disableTNT = true;
     public static boolean enableEntityMoveSync = false;
+    public static boolean disableItemEntity = true;
 
     public static void init() {
         LOGGER.info("Initializing Async Config...");
@@ -48,6 +49,9 @@ public class AsyncConfig {
         CONFIG.set("disableTNT", disableTNT);
         CONFIG.setComment("disableTNT", "Disables TNT entity parallelization. Use this to prevent asynchronous processing of TNT-related tasks");
 
+        CONFIG.set("disableItemEntity", disableItemEntity);
+        CONFIG.setComment("disableItemEntity", "Disables Item entity parallelization.");
+
         CONFIG.set("enableEntityMoveSync", enableEntityMoveSync);
         CONFIG.setComment("enableEntityMoveSync", "Modifies entity movement processing: true for synchronous movement (vanilla mechanics intact, less performance), false for asynchronous movement (better performance, may break mechanics).");
 
@@ -59,6 +63,7 @@ public class AsyncConfig {
         disabled = CONFIG.get("disabled");
         paraMax = CONFIG.get("paraMax");
         disableTNT = CONFIG.get("disableTNT");
+        disableItemEntity = CONFIG.get("disableItemEntity");
         enableEntityMoveSync = CONFIG.get("enableEntityMoveSync");
     }
 
@@ -72,6 +77,9 @@ public class AsyncConfig {
 
         CONFIG.set("disableTNT", disableTNT);
         CONFIG.setComment("disableTNT", "Disables TNT entity parallelization. Use this to prevent asynchronous processing of TNT-related tasks");
+
+        CONFIG.set("disableItemEntity", disableItemEntity);
+        CONFIG.setComment("disableItemEntity", "Disables Item entity parallelization.");
 
         CONFIG.set("enableEntityMoveSync", enableEntityMoveSync);
         CONFIG.setComment("enableEntityMoveSync", "Modifies entity movement processing: true for synchronous movement (vanilla mechanics intact, less performance), false for asynchronous movement (better performance, may break mechanics).");

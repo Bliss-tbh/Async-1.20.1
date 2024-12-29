@@ -37,8 +37,7 @@ public class ParallelProcessor {
     public static final Set<Class<?>> specialEntities = Set.of(
             FallingBlockEntity.class,
             PlayerEntity.class,
-            ServerPlayerEntity.class,
-            ItemEntity.class
+            ServerPlayerEntity.class
     );
 
     public static void setupThreadPool(int parallelism) {
@@ -86,7 +85,7 @@ public class ParallelProcessor {
     public static boolean shouldTickSynchronously(Entity entity) {
         return AsyncConfig.disabled || blacklistedEntity.contains(entity.getUuid()) || specialEntities.contains(entity.getClass())
                 || tickPortalSynchronously(entity) || entity.hasPlayerRider() || entity instanceof AbstractMinecartEntity
-                || (AsyncConfig.disableTNT && entity instanceof TntEntity);
+                || (AsyncConfig.disableItemEntity && entity instanceof ItemEntity) || (AsyncConfig.disableTNT && entity instanceof TntEntity);
     }
 
     private static boolean tickPortalSynchronously(Entity entity) {
