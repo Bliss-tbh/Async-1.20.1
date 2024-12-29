@@ -40,7 +40,7 @@ public class StatsCommand {
     }
 
     private static void showGeneralStats(ServerCommandSource source) {
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        int availableProcessors = AsyncConfig.getParallelism();
         double avgThreads = calculateAverageThreads();
         double threadUtilization = (avgThreads / availableProcessors) * 100.0;
 

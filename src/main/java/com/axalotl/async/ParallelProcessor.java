@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -87,6 +88,7 @@ public class ParallelProcessor {
                 || specialEntities.contains(entity.getClass())
                 || tickPortalSynchronously(entity)
                 || (entity.hasPlayerRider() && !(entity instanceof AbstractMinecartEntity))
+                || (AsyncConfig.disableItemEntity && entity instanceof ItemEntity)
                 || (AsyncConfig.disableTNT && entity instanceof TntEntity);
     }
 
