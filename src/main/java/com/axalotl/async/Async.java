@@ -1,14 +1,12 @@
 package com.axalotl.async;
 
 import com.axalotl.async.commands.AsyncCommand;
-import com.axalotl.async.commands.ConfigCommand;
 import com.axalotl.async.commands.StatsCommand;
 import com.axalotl.async.config.AsyncConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.command.CommandManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,10 +27,7 @@ public class Async implements ModInitializer {
             ParallelProcessor.setupThreadPool(AsyncConfig.getParallelism());
         });
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            AsyncCommand.register(dispatcher);
-            dispatcher.register(ConfigCommand.registerConfig(CommandManager.literal("async")));
-        });
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> AsyncCommand.register(dispatcher));
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             LOGGER.info("Shutting down Async thread pool...");

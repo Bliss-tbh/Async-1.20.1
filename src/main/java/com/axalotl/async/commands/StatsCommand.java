@@ -29,11 +29,13 @@ public class StatsCommand {
 
     public static LiteralArgumentBuilder<ServerCommandSource> registerStatus(LiteralArgumentBuilder<ServerCommandSource> root) {
         return root.then(literal("stats")
+                .requires(cmdSrc -> cmdSrc.hasPermissionLevel(4))
                 .executes(cmdCtx -> {
                     showGeneralStats(cmdCtx.getSource());
                     return 1;
                 })
                 .then(literal("entity")
+                        .requires(cmdSrc -> cmdSrc.hasPermissionLevel(4))
                         .executes(cmdCtx -> {
                             showEntityStats(cmdCtx.getSource());
                             return 1;

@@ -4,10 +4,7 @@ import com.axalotl.async.config.AsyncConfig;
 import com.axalotl.async.parallelised.ConcurrentCollections;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.FallingBlockEntity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.TntEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.vehicle.*;
@@ -83,9 +80,13 @@ public class ParallelProcessor {
     }
 
     public static boolean shouldTickSynchronously(Entity entity) {
-        return AsyncConfig.disabled || blacklistedEntity.contains(entity.getUuid()) || specialEntities.contains(entity.getClass())
-                || tickPortalSynchronously(entity) || entity.hasPlayerRider() || entity instanceof AbstractMinecartEntity
-                || (AsyncConfig.disableItemEntity && entity instanceof ItemEntity) || (AsyncConfig.disableTNT && entity instanceof TntEntity);
+        return AsyncConfig.disabled ||
+                blacklistedEntity.contains(entity.getUuid()) ||
+                specialEntities.contains(entity.getClass()) ||
+                AsyncConfig.synchronizedEntities.contains(EntityType.getId(entity.getType())) ||
+                tickPortalSynchronously(entity) ||
+                entity.hasPlayerRider() ||
+                entity instanceof AbstractMinecartEntity;
     }
 
     private static boolean tickPortalSynchronously(Entity entity) {
