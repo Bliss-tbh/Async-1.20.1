@@ -13,7 +13,6 @@
     "entity.EntityMixin",
     "entity.EntityTrackerEntryMixin",
     "entity.EntityTrackingSectionMixin",
-    "entity.ExperienceOrbEntityMixin",
     "entity.FoxEntityMixin",
     "entity.GoalSelectorMixin",
     "entity.HoldTradeOffersTaskMixin",
