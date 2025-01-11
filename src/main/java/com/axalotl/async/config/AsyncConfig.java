@@ -26,7 +26,11 @@ public class AsyncConfig {
     public static boolean disabled = false;
     public static int paraMax = -1;
     public static boolean enableEntityMoveSync = false;
-    public static Set<Identifier> synchronizedEntities = new HashSet<>();
+    public static Set<Identifier> synchronizedEntities = new HashSet<>(Set.of(
+            Identifier.ofVanilla("tnt"),
+            Identifier.ofVanilla("item"),
+            Identifier.ofVanilla("experience_orb")
+    ));
 
     public static void init() {
         LOGGER.info("Initializing Async Config...");
@@ -39,6 +43,7 @@ public class AsyncConfig {
             } else {
                 CONFIG.load();
                 loadConfigValues();
+                saveConfig();
                 LOGGER.info("Configuration successfully loaded.");
             }
         } catch (Throwable t) {
@@ -73,14 +78,17 @@ public class AsyncConfig {
         enableEntityMoveSync = CONFIG.getOrElse("enableEntityMoveSync", false);
 
         synchronizedEntities = new HashSet<>();
-        CONFIG.<List<String>>getOptional("synchronizedEntities").ifPresent(ids -> {
+        CONFIG.<List<String>>getOptional("synchronizedEntities").ifPresentOrElse(ids -> {
             for (String id : ids) {
                 Identifier identifier = Identifier.tryParse(id);
                 if (identifier != null) {
                     synchronizedEntities.add(identifier);
                 }
             }
-        });
+        }, () -> synchronizedEntities = new HashSet<>(Set.of(
+                Identifier.ofVanilla("tnt"),
+                Identifier.ofVanilla("item"),
+                Identifier.ofVanilla("experience_orb"))));
 
         Set<String> keysToRemove = new HashSet<>();
         for (CommentedConfig.Entry entry : CONFIG.entrySet()) {
@@ -102,11 +110,11 @@ public class AsyncConfig {
         disabled = false;
         paraMax = -1;
         enableEntityMoveSync = false;
-        synchronizedEntities = Set.of(
+        synchronizedEntities = new HashSet<>(Set.of(
                 Identifier.ofVanilla("tnt"),
                 Identifier.ofVanilla("item"),
                 Identifier.ofVanilla("experience_orb")
-        );
+        ));
     }
 
     public static int getParallelism() {
