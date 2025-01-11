@@ -104,7 +104,8 @@ public class AsyncConfig {
         enableEntityMoveSync = false;
         synchronizedEntities = Set.of(
                 Identifier.ofVanilla("tnt"),
-                Identifier.ofVanilla("item")
+                Identifier.ofVanilla("item"),
+                Identifier.ofVanilla("experience_orb")
         );
     }
 
