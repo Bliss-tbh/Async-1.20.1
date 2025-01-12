@@ -7,9 +7,8 @@ import lombok.Setter;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -86,10 +85,11 @@ public class ParallelProcessor {
         return AsyncConfig.disabled
                 || blacklistedEntity.contains(entity.getUUID())
                 || specialEntities.contains(entity.getClass())
+
+                || AsyncConfig.synchronizedEntities.contains(EntityType.getKey(entity.getType()))
+
                 || tickPortalSynchronously(entity)
-                || (entity.hasExactlyOnePlayerPassenger() && !(entity instanceof AbstractMinecart))
-                || (AsyncConfig.disableItemEntity && entity instanceof ItemEntity)
-                || (AsyncConfig.disableTNT && entity instanceof PrimedTnt);
+                || (entity.hasExactlyOnePlayerPassenger() && !(entity instanceof AbstractMinecart));
     }
 
     private static boolean tickPortalSynchronously(Entity entity) {

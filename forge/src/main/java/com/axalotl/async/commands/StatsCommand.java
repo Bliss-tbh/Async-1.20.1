@@ -28,11 +28,13 @@ public class StatsCommand {
 
     public static LiteralArgumentBuilder<CommandSourceStack> registerStatus(LiteralArgumentBuilder<CommandSourceStack> root) {
         return root.then(literal("stats")
+                .requires(cmdSrc -> cmdSrc.hasPermission(4))
                 .executes(cmdCtx -> {
                     showGeneralStats(cmdCtx.getSource());
                     return 1;
                 })
                 .then(literal("entity")
+                        .requires(cmdSrc -> cmdSrc.hasPermission(4))
                         .executes(cmdCtx -> {
                             showEntityStats(cmdCtx.getSource());
                             return 1;

@@ -1,10 +1,16 @@
 package com.axalotl.async.config;
 
+import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class AsyncConfig {
@@ -20,19 +26,29 @@ public class AsyncConfig {
 
     public static boolean disabled = false;
     public static int paraMax = -1;
-    public static boolean disableTNT = true;
     public static boolean enableEntityMoveSync = false;
-    public static boolean disableItemEntity = true;
+    public static Set<Identifier> synchronizedEntities = new HashSet<>(Set.of(
+            Objects.requireNonNull(Identifier.of("minecraft", "tnt")),
+            Objects.requireNonNull(Identifier.of("minecraft", "item")),
+            Objects.requireNonNull(Identifier.of("minecraft", "experience_orb"))
+    ));
 
     public static void init() {
         LOGGER.info("Initializing Async Config...");
         CONFIG = configSupplier.get();
         try {
-            CONFIG.load();
-            loadConfigValues();
-            LOGGER.info("Configuration successfully loaded.");
+            if (!CONFIG.getFile().exists()) {
+                LOGGER.warn("Configuration file not found, creating default configuration.");
+                setDefaultValues();
+                saveConfig();
+            } else {
+                CONFIG.load();
+                loadConfigValues();
+                saveConfig();
+                LOGGER.info("Configuration successfully loaded.");
+            }
         } catch (Throwable t) {
-            LOGGER.error("Error loading configuration, setting default values");
+            LOGGER.error("Error loading configuration, resetting to default values.", t);
             setDefaultValues();
             saveConfig();
         }
@@ -43,50 +59,85 @@ public class AsyncConfig {
         CONFIG.setComment("disabled", "Globally disable all toggleable functionality within the async system. Set to true to stop all asynchronous operations.");
 
         CONFIG.set("paraMax", paraMax);
-        CONFIG.setComment("paraMax", "Maximum number of threads to use for parallel processing. Set to -1 to use default value."
-                + "Note: If 'virtualThreads' is enabled, this setting will be ignored.");
-
-        CONFIG.set("disableTNT", disableTNT);
-        CONFIG.setComment("disableTNT", "Disables TNT entity parallelization. Use this to prevent asynchronous processing of TNT-related tasks");
-
-        CONFIG.set("disableItemEntity", disableItemEntity);
-        CONFIG.setComment("disableItemEntity", "Disables Item entity parallelization.");
+        CONFIG.setComment("paraMax", "Maximum number of threads to use for parallel processing. Set to -1 to use default value.");
 
         CONFIG.set("enableEntityMoveSync", enableEntityMoveSync);
         CONFIG.setComment("enableEntityMoveSync", "Modifies entity movement processing: true for synchronous movement (vanilla mechanics intact, less performance), false for asynchronous movement (better performance, may break mechanics).");
+
+        CONFIG.set("synchronizedEntities", synchronizedEntities.stream().map(Identifier::toString).toList());
+        CONFIG.setComment("synchronizedEntities", "List of entity class for sync processing.");
 
         CONFIG.save();
         LOGGER.info("Configuration saved successfully.");
     }
 
     private static void loadConfigValues() {
-        disabled = CONFIG.get("disabled");
-        paraMax = CONFIG.get("paraMax");
-        disableTNT = CONFIG.get("disableTNT");
-        disableItemEntity = CONFIG.get("disableItemEntity");
-        enableEntityMoveSync = CONFIG.get("enableEntityMoveSync");
+        Set<String> processedKeys = new HashSet<>(List.of("disabled", "paraMax", "enableEntityMoveSync", "synchronizedEntities"));
+
+        disabled = CONFIG.getOrElse("disabled", false);
+        paraMax = CONFIG.getOrElse("paraMax", -1);
+        enableEntityMoveSync = CONFIG.getOrElse("enableEntityMoveSync", false);
+
+        synchronizedEntities = new HashSet<>();
+        CONFIG.<List<String>>getOptional("synchronizedEntities").ifPresentOrElse(ids -> {
+            for (String id : ids) {
+                Identifier identifier = Identifier.tryParse(id);
+                if (identifier != null) {
+                    synchronizedEntities.add(identifier);
+                }
+            }
+        }, () -> synchronizedEntities = new HashSet<>(Set.of(
+                Objects.requireNonNull(Identifier.of("minecraft", "tnt")),
+                Objects.requireNonNull(Identifier.of("minecraft", "item")),
+                Objects.requireNonNull(Identifier.of("minecraft", "experience_orb")))));
+
+        Set<String> keysToRemove = new HashSet<>();
+        for (CommentedConfig.Entry entry : CONFIG.entrySet()) {
+            String key = entry.getKey();
+            if (!processedKeys.contains(key)) {
+                keysToRemove.add(key);
+            }
+        }
+
+        for (String key : keysToRemove) {
+            LOGGER.warn("Removing unused configuration key: {}", key);
+            CONFIG.remove(key);
+        }
+
+        CONFIG.save();
     }
 
     private static void setDefaultValues() {
-        CONFIG.set("disabled", false);
-        CONFIG.setComment("disabled", "Globally disable all toggleable functionality within the async system. Set to true to stop all asynchronous operations.");
-
-        CONFIG.set("paraMax", paraMax);
-        CONFIG.setComment("paraMax", "Maximum number of threads to use for parallel processing. Set to -1 to use default value."
-                + "Note: If 'virtualThreads' is enabled, this setting will be ignored.");
-
-        CONFIG.set("disableTNT", disableTNT);
-        CONFIG.setComment("disableTNT", "Disables TNT entity parallelization. Use this to prevent asynchronous processing of TNT-related tasks");
-
-        CONFIG.set("disableItemEntity", disableItemEntity);
-        CONFIG.setComment("disableItemEntity", "Disables Item entity parallelization.");
-
-        CONFIG.set("enableEntityMoveSync", enableEntityMoveSync);
-        CONFIG.setComment("enableEntityMoveSync", "Modifies entity movement processing: true for synchronous movement (vanilla mechanics intact, less performance), false for asynchronous movement (better performance, may break mechanics).");
+        disabled = false;
+        paraMax = -1;
+        enableEntityMoveSync = false;
+        synchronizedEntities = new HashSet<>(Set.of(
+                Objects.requireNonNull(Identifier.of("minecraft", "tnt")),
+                Objects.requireNonNull(Identifier.of("minecraft", "item")),
+                Objects.requireNonNull(Identifier.of("minecraft", "experience_orb"))
+        ));
     }
 
     public static int getParallelism() {
         if (paraMax <= 0) return Runtime.getRuntime().availableProcessors();
         return Math.max(1, Math.min(Runtime.getRuntime().availableProcessors(), paraMax));
+    }
+
+    public static void syncEntity(Identifier entityId) {
+        if (synchronizedEntities.add(entityId)) {
+            saveConfig();
+            LOGGER.info("Sync entity class: {}", entityId);
+        } else {
+            LOGGER.warn("Entity class already synchronized: {}", entityId);
+        }
+    }
+
+    public static void asyncEntity(Identifier entityId) {
+        if (synchronizedEntities.remove(entityId)) {
+            saveConfig();
+            LOGGER.info("Enable async process entity class: {}", entityId);
+        } else {
+            LOGGER.warn("Entity class not found: {}", entityId);
+        }
     }
 }

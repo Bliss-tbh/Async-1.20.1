@@ -30,6 +30,11 @@ public abstract class LivingEntityMixin extends Entity {
         original.call(damageSource, causedByPlayer);
     }
 
+    @WrapMethod(method = "tickStatusEffects")
+    private synchronized void tickStatusEffects(Operation<Void> original) {
+        original.call();
+    }
+
     @Inject(method = "isClimbing", at = @At("HEAD"), cancellable = true)
     private void isClimbing(CallbackInfoReturnable<Boolean> cir) {
         BlockState blockState = this.getBlockStateAtPos();

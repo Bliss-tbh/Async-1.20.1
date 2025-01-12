@@ -4,5 +4,6 @@
 
 /fabric/.gradle/
 /fabric/build/
+/fabric/run/
 
 /forge/build/
