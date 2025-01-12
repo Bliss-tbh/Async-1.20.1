@@ -1,6 +1,8 @@
 [![Issues](https://img.shields.io/github/issues/AxalotLDev/Async?style=for-the-badge)](https://github.com/AxalotLDev/Async/issues)
 <img width="100" src="https://github.com/AxalotLDev/Async/raw/ver/1.21.1/src/main/resources/assets/async/icon.png" alt="Async icon" align="right">
-<div align="left">
+<div aligncss{
+text-align:left;
+}>
 <h1>Async - Minecraft Entity Multi-Threading Mod</h1>
 <h3>Async is a Fabric mod designed to improve entity performance by processing them in parallel using multiple CPU cores and threads.</h3>
 </div>
@@ -20,11 +22,11 @@ Async is a Fabric mod that enhances the performance of entity processing. The mo
 
 ### 📊 Performance Comparison (9000 Villagers)
 
-| Configuration           | TPS  | MSPT   |
-| ----------------------- | ---- | ------ |
-| **Lithium + Async**     | 20   | 41.8   |
+| Configuration               | TPS  | MSPT   |
+|-----------------------------|------|--------|
+| **Lithium + Async**         | 20   | 41.8   |
 | **Lithium (without Async)** | 4.4  | 225.4  |
-| **Purpur**              | 5.72 | 176.18 |
+| **Purpur**                  | 5.72 | 176.18 |
 
 ### 🛠️ Test Configuration
 
@@ -44,7 +46,7 @@ Concurrent Chunk Management Engine, Fabric API, FerriteCore, Lithium, ScalableLu
 ## 🔧 Commands
 
 - `/async config toggle` — Enables or disables the mod in-game (no server restart required). Use this command to instantly see how Async improves your server.
-- `/async config setEntityMoveSync` — Disables parallel processing of entity movement. Useful for preventing potential desynchronization with vanilla logic (disabled by default). Always enabled for items.
+- `/async config setEntityMoveSync` — Disables parallel processing of entity movement. Useful for preventing potential synchronization with vanilla logic (disabled by default). Always enabled for items.
 - `/async config setDisableTNT` — Enables or disables parallel processing of TNT. (Disabled by default as the feature is unstable).
 - `/async stats` — Displays the number of threads in use.
 - `/async stats entity` — Shows the number of entities processed by Async in various worlds.

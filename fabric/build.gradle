@@ -62,6 +62,8 @@ loom {
     accessWidenerPath = file("src/main/resources/async.accesswidener")
 }
 
+tasks.register("prepareKotlinBuildScriptModel"){}
+
 jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
