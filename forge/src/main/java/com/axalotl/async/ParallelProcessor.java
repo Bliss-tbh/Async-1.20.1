@@ -11,7 +11,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -83,13 +82,13 @@ public class ParallelProcessor {
 
     public static boolean shouldTickSynchronously(Entity entity) {
         return AsyncConfig.disabled
-                || blacklistedEntity.contains(entity.getUUID())
-                || specialEntities.contains(entity.getClass())
+                || tickPortalSynchronously(entity)
+                || entity.hasExactlyOnePlayerPassenger()
 
                 || AsyncConfig.synchronizedEntities.contains(EntityType.getKey(entity.getType()))
 
-                || tickPortalSynchronously(entity)
-                || (entity.hasExactlyOnePlayerPassenger() && !(entity instanceof AbstractMinecart));
+                || blacklistedEntity.contains(entity.getUUID())
+                || specialEntities.contains(entity.getClass());
     }
 
     private static boolean tickPortalSynchronously(Entity entity) {

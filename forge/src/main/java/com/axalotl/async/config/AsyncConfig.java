@@ -5,6 +5,8 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -14,15 +16,19 @@ public class AsyncConfig {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static ForgeConfigSpec SPEC;
 
-    public static boolean disabled;
-    public static int paraMax;
-    public static boolean enableEntityMoveSync;
-    public static Set<ResourceLocation> synchronizedEntities;
+    public static boolean disabled = false;
+    public static int paraMax = -1;
+    public static boolean enableEntityMoveSync = false;
+    public static Set<ResourceLocation> synchronizedEntities = new HashSet<>(Set.of(
+            Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "tnt")),
+            Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "item")),
+            Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "experience_orb"))
+    ));
 
     private static final ForgeConfigSpec.ConfigValue<Boolean> disabledv;
     private static final ForgeConfigSpec.ConfigValue<Integer> paraMaxv;
     private static final ForgeConfigSpec.ConfigValue<Boolean> enableEntityMoveSyncv;
-    private static final ForgeConfigSpec.ConfigValue<Set<ResourceLocation>> synchronizedEntitiesv;
+    private static final ForgeConfigSpec.ConfigValue<List<String>> synchronizedEntitiesv;
 
     static {
         BUILDER.push("Async Configs");
@@ -34,11 +40,7 @@ public class AsyncConfig {
                 .define("paraMax", -1);
 
         synchronizedEntitiesv = BUILDER.comment("Disables Item entity parallelization.")
-                .define("synchronizedEntities", Set.of(
-                        Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "tnt")),
-                        Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "item")),
-                        Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "experience_orb"))
-                ));
+                .define("synchronizedEntities", synchronizedEntities.stream().map(ResourceLocation::toString).toList());
 
         enableEntityMoveSyncv = BUILDER.comment("Modifies entity movement processing: true for synchronous movement (vanilla mechanics intact, less performance), false for asynchronous movement (better performance, may break mechanics).")
                 .define("enableEntityMoveSync", false);
@@ -51,7 +53,19 @@ public class AsyncConfig {
     public static void castConfig() {
         disabled = disabledv.get();
         paraMax = paraMaxv.get();
-        synchronizedEntities = synchronizedEntitiesv.get();
+        synchronizedEntities = new HashSet<>();
+        SPEC.<List<String>>getOptional("synchronizedEntities").ifPresentOrElse(ids -> {
+            for (String id : ids) {
+                ResourceLocation resourceLocation = ResourceLocation.tryParse(id);
+                if (resourceLocation != null) {
+                    synchronizedEntities.add(resourceLocation);
+                }
+            }
+        }, () -> synchronizedEntities = new HashSet<>(Set.of(
+                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "tnt")),
+                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "item")),
+                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "experience_orb"))
+        )));
         enableEntityMoveSync = enableEntityMoveSyncv.get();
         LOGGER.info("Config Casted");
     }
@@ -59,7 +73,7 @@ public class AsyncConfig {
     public static void saveConfig() {
         disabledv.set(disabled);
         paraMaxv.set(paraMax);
-        synchronizedEntitiesv.set(synchronizedEntities);
+        synchronizedEntitiesv.set(synchronizedEntities.stream().map(ResourceLocation::toString).toList());
         enableEntityMoveSyncv.set(enableEntityMoveSync);
         LOGGER.info("Configuration successfully saved.");
     }
