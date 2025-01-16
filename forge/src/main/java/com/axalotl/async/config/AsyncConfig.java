@@ -54,7 +54,7 @@ public class AsyncConfig {
         disabled = disabledv.get();
         paraMax = paraMaxv.get();
         synchronizedEntities = new HashSet<>();
-        SPEC.<List<String>>getOptional("synchronizedEntities").ifPresentOrElse(ids -> {
+        SPEC.getSpec().<List<String>>getOptional("synchronizedEntities").ifPresentOrElse(ids -> {
             for (String id : ids) {
                 ResourceLocation resourceLocation = ResourceLocation.tryParse(id);
                 if (resourceLocation != null) {
