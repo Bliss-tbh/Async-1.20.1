@@ -3,7 +3,7 @@ package com.axalotl.async.mixin.c2me;
 import com.axalotl.async.ParallelProcessor;
 import com.ishland.c2me.fixes.worldgen.threading_issues.common.CheckedThreadLocalRandom;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.random.LocalRandom;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.function.Supplier;
 
 @Mixin(value = CheckedThreadLocalRandom.class, remap = false)
-public abstract class CheckedThreadLocalRandomMixin extends LocalRandom {
+public abstract class CheckedThreadLocalRandomMixin extends SingleThreadedRandomSource {
 
     @Shadow
     @Final
@@ -35,7 +35,7 @@ public abstract class CheckedThreadLocalRandomMixin extends LocalRandom {
         }
 
         Thread currentOwner = owner != null ? owner.get() : null;
-        Thread expectedOwner = server.isOnThread() ? currentOwner : Thread.currentThread();
+        Thread expectedOwner = server.isSameThread() ? currentOwner : Thread.currentThread();
 
         if (currentOwner != null && currentOwner != expectedOwner) {
             handleNotOwner();
@@ -45,4 +45,3 @@ public abstract class CheckedThreadLocalRandomMixin extends LocalRandom {
         }
     }
 }
-

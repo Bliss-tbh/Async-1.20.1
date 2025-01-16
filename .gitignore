@@ -1,7 +1,5 @@
-# Project exclude paths
 /.gradle/
-/.idea
-build
-run
-/c2me-fixes-general-threading-issues-mc1.21.1-0.3.0+alpha.0.291.jar
-/c2me-fixes-worldgen-threading-issues-mc1.21.1-0.3.0+alpha.0.291.jar
+/.idea/
+
+/build/
+/run/

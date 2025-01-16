@@ -3,38 +3,56 @@ package com.axalotl.async;
 import com.axalotl.async.commands.AsyncCommand;
 import com.axalotl.async.commands.StatsCommand;
 import com.axalotl.async.config.AsyncConfig;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.logging.LogUtils;
+import net.minecraft.commands.CommandSourceStack;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.javafmlmod.FMLModContainer;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import org.slf4j.Logger;
 
-public class Async implements ModInitializer {
-    public static final Logger LOGGER = LogManager.getLogger();
-    public static Boolean c2me = FabricLoader.getInstance().isModLoaded("c2me");
+@Mod(Async.MOD_ID)
+public class Async {
 
-    @Override
-    public void onInitialize() {
+    public static final String MOD_ID = "async";
+    public static final Logger LOGGER = LogUtils.getLogger();
+    public static Boolean c2me = false;
+
+    public Async(FMLModContainer container) {
+        NeoForge.EVENT_BUS.register(this);
+
         LOGGER.info("Initializing Async...");
-        c2me = FabricLoader.getInstance().isModLoaded("c2me");
-        AsyncConfig.init();
-        StatsCommand.runStatsThread();
-
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            LOGGER.info("Async Setting up thread-pool...");
-            ParallelProcessor.setServer(server);
-            ParallelProcessor.setupThreadPool(AsyncConfig.getParallelism());
-        });
-
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> AsyncCommand.register(dispatcher));
-
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            LOGGER.info("Shutting down Async thread pool...");
-            ParallelProcessor.stop();
-            StatsCommand.shutdown();
-        });
-
+        c2me = ModList.get().isLoaded("c2me");
+        container.registerConfig(ModConfig.Type.COMMON, AsyncConfig.SPEC, "async.toml");
         LOGGER.info("Async Initialized successfully");
+    }
+
+    @SubscribeEvent
+    public void onServerStarting(ServerStartingEvent event) {
+        LOGGER.info("Async Setting up thread-pool...");
+        AsyncConfig.castConfig();
+        StatsCommand.runStatsThread();
+        ParallelProcessor.setServer(event.getServer());
+        ParallelProcessor.setupThreadPool(AsyncConfig.getParallelism());
+    }
+
+    @SubscribeEvent
+    public void registerCommandsEvent(RegisterCommandsEvent event) {
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+
+        AsyncCommand.register(dispatcher, true);
+    }
+
+    @SubscribeEvent
+    public void onServerStopping(ServerStoppingEvent event) {
+        LOGGER.info("Shutting down Async thread pool...");
+        ParallelProcessor.stop();
+        StatsCommand.shutdown();
     }
 }
