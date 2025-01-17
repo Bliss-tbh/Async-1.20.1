@@ -36,7 +36,6 @@
     "entity.ServerEntityMixin",
     "entity.ServerPlayerMixin",
     "entity.ShowTradesToPlayerMixin",
-    "entity.TemptingSensorMixin",
     "entity.VillagerMixin",
     "server.MinecraftServerMixin",
     "utils.ClassInstanceMultiMapMixin",
