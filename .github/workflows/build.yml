@@ -22,11 +22,6 @@ jobs:
         java-version: 22
         java-package: jdk
 
-    - name: Install LLVM
-      uses: KyleMayes/install-llvm-action@v2
-      with:
-        version: "18.1.8"
-
     - name: Install required dependencies
       run: sudo apt update && sudo apt install libtinfo5
 
