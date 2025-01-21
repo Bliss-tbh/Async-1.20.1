@@ -30,6 +30,9 @@ jobs:
     - name: Install required dependencies
       run: sudo apt update && sudo apt install libtinfo5
 
+    - name: Grant execute permission to gradlew
+      run: chmod +x ./gradlew
+    
     - uses: actions/cache@v4
       with:
         path: |
