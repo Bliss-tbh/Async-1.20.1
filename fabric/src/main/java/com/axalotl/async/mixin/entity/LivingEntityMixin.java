@@ -45,4 +45,9 @@ public abstract class LivingEntityMixin extends Entity {
         BlockState blockState = this.getBlockStateAtPos();
         if (blockState == null) cir.setReturnValue(false);
     }
+
+    @WrapMethod(method = "knockback")
+    private synchronized void knockback(LivingEntity target, Operation<Void> original) {
+        original.call(target);
+    }
 }

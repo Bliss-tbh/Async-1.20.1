@@ -24,7 +24,7 @@ public abstract class MinecraftServerMixin extends ReentrantThreadExecutor<Serve
 
     @Redirect(method = "reloadResources", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isOnThread()Z"))
     private boolean onServerExecutionThreadPatch(MinecraftServer minecraftServer) {
-        return ParallelProcessor.serverExecutionThreadPatch();
+        return ParallelProcessor.isServerExecutionThread();
     }
 
     @Override
