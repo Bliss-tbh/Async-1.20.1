@@ -26,11 +26,4 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     private synchronized void onDead(DamageSource damageSource, Operation<Void> original) {
         original.call(damageSource);
     }
-
-    @WrapMethod(method = "onDisconnect")
-    private void onDisconnect(Operation<Void> original) {
-        synchronized (lock) {
-            original.call();
-        }
-    }
 }
