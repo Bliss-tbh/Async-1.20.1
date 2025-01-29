@@ -6,6 +6,7 @@
   "mixins": [
     "entity.AllayEntityMixin",
     "entity.BeeEntityMixin",
+    "entity.BeehiveBlockEntityBeeMixin",
     "entity.DamageTrackerMixin",
     "entity.DolphinEntityMixin",
     "entity.EntityIndexMixin",
