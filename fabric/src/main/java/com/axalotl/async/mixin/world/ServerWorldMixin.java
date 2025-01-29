@@ -5,9 +5,17 @@ import com.axalotl.async.parallelised.ConcurrentCollections;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.BlockEvent;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.profiler.Profilers;
+import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,11 +26,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Mixin(value = ServerWorld.class)
-public abstract class ServerWorldMixin implements StructureWorldAccess {
+public abstract class ServerWorldMixin extends World implements StructureWorldAccess {
     @Unique
     ConcurrentLinkedQueue<BlockEvent> syncedBlockEventQueue;
     @Shadow
@@ -30,10 +39,24 @@ public abstract class ServerWorldMixin implements StructureWorldAccess {
     @Mutable
     Set<MobEntity> loadedMobs;
 
+    protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates) {
+        super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
+    }
+
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(CallbackInfo ci) {
         loadedMobs = ConcurrentCollections.newHashSet();
         syncedBlockEventQueue = new ConcurrentLinkedQueue<>();
+    }
+
+    @Inject(method = "tick", at = @At(value = "RETURN", target = "Lnet/minecraft/world/EntityList;forEach(Ljava/util/function/Consumer;)V"))
+    private void afterTickEntity(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+        Profiler profiler = Profilers.get();
+        profiler.push("tick");
+        if ((Object) this instanceof ServerWorld) {
+            ParallelProcessor.postEntityTick();
+        }
+        profiler.pop();
     }
 
     @Redirect(method = "method_31420", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickEntity(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"))
