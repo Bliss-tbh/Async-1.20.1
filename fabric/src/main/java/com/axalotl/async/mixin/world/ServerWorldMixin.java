@@ -49,14 +49,11 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
         syncedBlockEventQueue = new ConcurrentLinkedQueue<>();
     }
 
-    @Inject(method = "tick", at = @At(value = "RETURN", target = "Lnet/minecraft/world/EntityList;forEach(Ljava/util/function/Consumer;)V"))
+    @Inject(method = "tick", at = @At(value = "TAIL", target = "Lnet/minecraft/world/EntityList;forEach(Ljava/util/function/Consumer;)V"))
     private void afterTickEntity(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-        Profiler profiler = Profilers.get();
-        profiler.push("tick");
         if ((Object) this instanceof ServerWorld) {
             ParallelProcessor.postEntityTick();
         }
-        profiler.pop();
     }
 
     @Redirect(method = "method_31420", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickEntity(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"))
