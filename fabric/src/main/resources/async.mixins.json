@@ -8,6 +8,7 @@
     "entity.AnimalEntityMixin",
     "entity.BeeEntityMixin",
     "entity.BeehiveBlockEntityBeeMixin",
+    "entity.BrainMixin",
     "entity.DamageTrackerMixin",
     "entity.DolphinEntityMixin",
     "entity.EntityIndexMixin",
