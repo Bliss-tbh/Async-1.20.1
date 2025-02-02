@@ -17,7 +17,7 @@ public abstract class EntityMixin {
     private static final ReentrantLock lock = new ReentrantLock();
 
     @WrapMethod(method = "move")
-    private synchronized void move(MovementType type, Vec3d movement, Operation<Void> original) {
+    private void move(MovementType type, Vec3d movement, Operation<Void> original) {
         if (AsyncConfig.enableEntityMoveSync) {
             synchronized (lock) {
                 original.call(type, movement);
@@ -40,7 +40,9 @@ public abstract class EntityMixin {
     }
 
     @WrapMethod(method = "setRemoved")
-    private synchronized void setRemoved(Entity.RemovalReason reason, Operation<Void> original) {
-        original.call(reason);
+    private void setRemoved(Entity.RemovalReason reason, Operation<Void> original) {
+        synchronized (lock) {
+            original.call(reason);
+        }
     }
 }

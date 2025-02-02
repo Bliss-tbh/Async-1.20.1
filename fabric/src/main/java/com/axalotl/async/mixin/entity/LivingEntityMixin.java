@@ -9,12 +9,17 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 @Mixin(value = LivingEntity.class, priority = 1001)
 public abstract class LivingEntityMixin extends Entity {
+    @Unique
+    private static final ReentrantLock lock = new ReentrantLock();
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -44,6 +49,13 @@ public abstract class LivingEntityMixin extends Entity {
     private void isClimbing(CallbackInfoReturnable<Boolean> cir) {
         BlockState blockState = this.getBlockStateAtPos();
         if (blockState == null) cir.setReturnValue(false);
+    }
+
+    @WrapMethod(method = "updateAttributes")
+    private void updateAttributes(Operation<Void> original) {
+        synchronized (lock) {
+            original.call();
+        }
     }
 
     @WrapMethod(method = "knockback")

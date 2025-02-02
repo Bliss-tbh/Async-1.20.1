@@ -10,8 +10,6 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.BlockEvent;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.profiler.Profilers;
 import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.World;
@@ -30,7 +28,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@Mixin(value = ServerWorld.class)
+@Mixin(value = ServerWorld.class, priority = 1500)
 public abstract class ServerWorldMixin extends World implements StructureWorldAccess {
     @Unique
     ConcurrentLinkedQueue<BlockEvent> syncedBlockEventQueue;

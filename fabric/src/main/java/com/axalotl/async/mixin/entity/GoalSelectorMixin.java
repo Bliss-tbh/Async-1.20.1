@@ -3,6 +3,7 @@ package com.axalotl.async.mixin.entity;
 import com.axalotl.async.parallelised.ConcurrentCollections;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import org.spongepowered.asm.mixin.*;
@@ -32,6 +33,20 @@ public abstract class GoalSelectorMixin {
     private void tickGoals(boolean tickAll, Operation<Void> original) {
         synchronized (lock) {
             original.call(tickAll);
+        }
+    }
+
+    @WrapMethod(method = "add")
+    private void add(int priority, Goal goal, Operation<Void> original) {
+        synchronized (lock) {
+            original.call(priority, goal);
+        }
+    }
+
+    @WrapMethod(method = "remove")
+    private void remove(Goal goal, Operation<Void> original) {
+        synchronized (lock) {
+            original.call(goal);
         }
     }
 }
