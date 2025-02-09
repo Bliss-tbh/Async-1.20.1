@@ -52,7 +52,7 @@ public abstract class ThreadedAnvilChunkStorageMixin extends VersionedChunkStora
         original.call(entity);
     }
 
-    @Inject(method = "loadEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;throwOrPause(Ljava/lang/Throwable;)Ljava/lang/Throwable;"), cancellable = true)
+    @Inject(method = "loadEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;getFatalOrPause(Ljava/lang/Throwable;)Ljava/lang/Throwable;"), cancellable = true)
     private void skipThrowLoadEntity(Entity entity, CallbackInfo ci) {
         ci.cancel();
     }
