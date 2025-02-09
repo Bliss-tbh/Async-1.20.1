@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.Mixin;
         Reference2IntOpenHashMap.class,
         ReferenceArrayList.class,
         Object2ReferenceOpenCustomHashMap.class,
-        Object2ReferenceOpenCustomHashMap.class,
         Reference2ByteOpenHashMap.class,
         Reference2LongOpenHashMap.class
 },

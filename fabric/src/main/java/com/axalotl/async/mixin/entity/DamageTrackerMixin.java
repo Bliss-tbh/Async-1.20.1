@@ -12,7 +12,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mixin(DamageTracker.class)
 public class DamageTrackerMixin {
-
     @Shadow
     @Final
     @Mutable

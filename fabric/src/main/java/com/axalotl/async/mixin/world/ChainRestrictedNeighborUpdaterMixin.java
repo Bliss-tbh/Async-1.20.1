@@ -25,5 +25,4 @@ public abstract class ChainRestrictedNeighborUpdaterMixin implements NeighborUpd
     private synchronized void syncEnqueue(BlockPos pos, ChainRestrictedNeighborUpdater.Entry entry, Operation<Void> original) {
         original.call(pos, entry);
     }
-
 }

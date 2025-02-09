@@ -7,10 +7,7 @@ import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import net.minecraft.world.entity.EntityLike;
 import net.minecraft.world.entity.EntityTrackingSection;
 import net.minecraft.world.entity.SectionedEntityCache;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -18,11 +15,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SectionedEntityCache.class)
 public abstract class SectionedEntityCacheMixin<T extends EntityLike> {
+    @Shadow
+    @Final
     @Mutable
-    @Shadow @Final private Long2ObjectMap<EntityTrackingSection<T>> trackingSections;
+    private LongSortedSet trackedPositions;
 
     @Mutable
-    @Shadow @Final private LongSortedSet trackedPositions;
+    @Shadow
+    @Final
+    private Long2ObjectMap<EntityTrackingSection<T>> trackingSections;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void replaceConVars(CallbackInfo ci) {

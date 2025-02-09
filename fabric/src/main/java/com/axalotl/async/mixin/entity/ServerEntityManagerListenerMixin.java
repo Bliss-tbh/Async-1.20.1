@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Mixin(ServerEntityManager.Listener.class)
 public abstract class ServerEntityManagerListenerMixin implements AutoCloseable {
     @Unique
-    private static final ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
     @WrapMethod(method = "updateEntityPosition")
     private void updateEntityPosition(Operation<Void> original) {

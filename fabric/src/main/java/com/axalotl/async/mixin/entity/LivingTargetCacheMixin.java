@@ -17,7 +17,6 @@ import java.util.function.Predicate;
 
 @Mixin(LivingTargetCache.class)
 public class LivingTargetCacheMixin {
-
     @Mutable
     @Shadow
     @Final

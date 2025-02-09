@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Mixin(value = LivingEntity.class, priority = 1001)
 public abstract class LivingEntityMixin extends Entity {
     @Unique
-    private static final ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -40,26 +40,23 @@ public abstract class LivingEntityMixin extends Entity {
         original.call();
     }
 
+    @WrapMethod(method = "knockback")
+    private void knockback(LivingEntity target, Operation<Void> original) {
+        synchronized (lock) {
+            original.call(target);
+        }
+    }
+
     @WrapMethod(method = "tickStatusEffects")
     private synchronized void tickStatusEffects(Operation<Void> original) {
-        original.call();
+        synchronized (lock) {
+            original.call();
+        }
     }
 
     @Inject(method = "isClimbing", at = @At("HEAD"), cancellable = true)
     private void isClimbing(CallbackInfoReturnable<Boolean> cir) {
         BlockState blockState = this.getBlockStateAtPos();
         if (blockState == null) cir.setReturnValue(false);
-    }
-
-    @WrapMethod(method = "updateAttributes")
-    private void updateAttributes(Operation<Void> original) {
-        synchronized (lock) {
-            original.call();
-        }
-    }
-
-    @WrapMethod(method = "knockback")
-    private synchronized void knockback(LivingEntity target, Operation<Void> original) {
-        original.call(target);
     }
 }

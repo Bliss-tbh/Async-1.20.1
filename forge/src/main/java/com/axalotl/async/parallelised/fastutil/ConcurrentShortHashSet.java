@@ -14,38 +14,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * This implementation provides concurrent access and high performance for concurrent operations.
  */
 public final class ConcurrentShortHashSet implements ShortSet {
-    
+
     private final ConcurrentHashMap.KeySetView<Short, Boolean> backing;
-    
+
     /**
-     * Creates a new empty concurrent short set
+     * Creates a new empty concurrent short set.
      */
     public ConcurrentShortHashSet() {
         this.backing = ConcurrentHashMap.newKeySet();
-    }
-
-    /**
-     * Creates a new concurrent short set containing all elements from the given collection
-     *
-     * @param collection initial elements
-     * @throws NullPointerException if collection is null
-     */
-    public ConcurrentShortHashSet(Collection<Short> collection) {
-        this();
-        addAll(Objects.requireNonNull(collection, "Initial collection cannot be null"));
-    }
-
-    /**
-     * Creates a new concurrent short set with the specified initial capacity
-     *
-     * @param initialCapacity the initial capacity of the set
-     * @throws IllegalArgumentException if initialCapacity is negative
-     */
-    public ConcurrentShortHashSet(int initialCapacity) {
-        if (initialCapacity < 0) {
-            throw new IllegalArgumentException("Initial capacity cannot be negative: " + initialCapacity);
-        }
-        this.backing = ConcurrentHashMap.newKeySet(initialCapacity);
     }
 
     @Override
@@ -59,20 +35,19 @@ public final class ConcurrentShortHashSet implements ShortSet {
     }
 
     @Override
-    public ShortIterator iterator() {
+    public @NotNull ShortIterator iterator() {
         return FastUtilHackUtil.itrShortWrap(backing);
     }
 
     @NotNull
     @Override
-    public Object[] toArray() {
+    public Object @NotNull [] toArray() {
         return backing.toArray();
     }
 
     @NotNull
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T[] toArray(@NotNull T[] array) {
+    public <T> T @NotNull [] toArray(@NotNull T @NotNull [] array) {
         Objects.requireNonNull(array, "Array cannot be null");
         return backing.toArray(array);
     }
@@ -118,10 +93,12 @@ public final class ConcurrentShortHashSet implements ShortSet {
 
     @Override
     public short[] toShortArray() {
-        Object[] objects = backing.toArray();
-        short[] result = new short[objects.length];
-        for (int i = 0; i < objects.length; i++) {
-            result[i] = (Short) objects[i];
+        int size = backing.size();
+        short[] result = new short[size];
+        int i = 0;
+        // Используем for-each для обхода backing
+        for (Short value : backing) {
+            result[i++] = value;
         }
         return result;
     }
@@ -189,9 +166,8 @@ public final class ConcurrentShortHashSet implements ShortSet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ShortSet that)) return false;
-        
         if (size() != that.size()) return false;
-        return containsAll((ShortCollection) that);
+        return containsAll(that);
     }
 
     @Override

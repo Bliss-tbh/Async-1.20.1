@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Objects;
@@ -58,17 +59,6 @@ public final class Long2ObjectConcurrentHashMap<V> implements Long2ObjectMap<V> 
         this.backing = new ConcurrentHashMap<>(initialCapacity, loadFactor);
     }
 
-    /**
-     * Creates a new concurrent map containing the same mappings as the specified map
-     *
-     * @param map the map whose mappings are to be placed in this map
-     * @throws NullPointerException if map is null
-     */
-    public Long2ObjectConcurrentHashMap(Map<? extends Long, ? extends V> map) {
-        this(Math.max(DEFAULT_INITIAL_CAPACITY, map.size()));
-        putAll(Objects.requireNonNull(map, "Source map cannot be null"));
-    }
-
     @Override
     public V get(long key) {
         V value = backing.get(key);
@@ -86,7 +76,7 @@ public final class Long2ObjectConcurrentHashMap<V> implements Long2ObjectMap<V> 
     }
 
     @Override
-    public void putAll(Map<? extends Long, ? extends V> m) {
+    public void putAll(@NotNull Map<? extends Long, ? extends V> m) {
         Objects.requireNonNull(m, "Source map cannot be null");
         backing.putAll(m);
     }
@@ -112,12 +102,12 @@ public final class Long2ObjectConcurrentHashMap<V> implements Long2ObjectMap<V> 
     }
 
     @Override
-    public LongSet keySet() {
+    public @NotNull LongSet keySet() {
         return FastUtilHackUtil.wrapLongSet(backing.keySet());
     }
 
     @Override
-    public ObjectCollection<V> values() {
+    public @NotNull ObjectCollection<V> values() {
         return FastUtilHackUtil.wrap(backing.values());
     }
 
@@ -215,15 +205,6 @@ public final class Long2ObjectConcurrentHashMap<V> implements Long2ObjectMap<V> 
         Objects.requireNonNull(remappingFunction, "Remapping function cannot be null");
         V newValue = backing.compute(key, remappingFunction);
         return (newValue == null && !backing.containsKey(key)) ? defaultReturnValue : newValue;
-    }
-
-    /**
-     * Returns the concurrent map backing this primitive map
-     *
-     * @return the backing concurrent map
-     */
-    public ConcurrentHashMap<Long, V> concurrentView() {
-        return backing;
     }
 
     @Override
