@@ -17,7 +17,7 @@ import java.util.stream.Collector;
 @Mixin(value = TypeFilterableList.class)
 public abstract class TypeFilterableListMixin<T> extends AbstractCollection<T> {
     @Unique
-    private final ReentrantLock lock = new ReentrantLock();
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @Shadow
     private final Map<Class<?>, List<T>> elementsByType = new ConcurrentHashMap<>();

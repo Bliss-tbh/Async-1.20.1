@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Mixin(ServerWorld.ServerEntityHandler.class)
 public class ServerEntityHandlerMixin {
     @Unique
-    private final ReentrantLock lock = new ReentrantLock();
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @WrapMethod(method = "startTicking(Lnet/minecraft/entity/Entity;)V")
     private void startTicking(Entity entity, Operation<Void> original) {

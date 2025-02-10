@@ -22,7 +22,7 @@ public abstract class GoalSelectorMixin {
     private Set<PrioritizedGoal> goals;
 
     @Unique
-    private final ReentrantLock lock = new ReentrantLock();
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(CallbackInfo ci) {

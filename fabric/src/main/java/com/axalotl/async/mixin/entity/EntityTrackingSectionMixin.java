@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Mixin(EntityTrackingSection.class)
 public class EntityTrackingSectionMixin {
     @Unique
-    private final ReentrantLock lock = new ReentrantLock();
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @WrapMethod(method = "add")
     private void add(EntityLike entity, Operation<Void> original) {

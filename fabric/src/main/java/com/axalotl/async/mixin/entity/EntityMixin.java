@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Mixin(Entity.class)
 public abstract class EntityMixin {
     @Unique
-    private final ReentrantLock lock = new ReentrantLock();
+    private static final ReentrantLock lock = new ReentrantLock();
 
     @WrapMethod(method = "move")
     private void move(MovementType type, Vec3d movement, Operation<Void> original) {
