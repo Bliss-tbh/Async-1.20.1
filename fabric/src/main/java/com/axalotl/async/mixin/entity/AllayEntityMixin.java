@@ -24,4 +24,3 @@ public abstract class AllayEntityMixin implements InventoryOwner {
         }
     }
 }
-
