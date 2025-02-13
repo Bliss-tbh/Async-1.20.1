@@ -51,6 +51,7 @@
     "world.ChainRestrictedNeighborUpdaterMixin",
     "world.ChunkHolderMixin",
     "world.ChunkTicketManagerMixin",
+    "world.RandomSequencesStateMixin",
     "world.ScoreboardMixin",
     "world.SerializingRegionBasedStorageMixin",
     "world.ServerChunkManagerMixin",
