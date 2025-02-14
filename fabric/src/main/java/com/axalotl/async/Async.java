@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Async implements ModInitializer {
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger(Async.class);
 
     @Override
     public void onInitialize() {
@@ -33,6 +33,6 @@ public class Async implements ModInitializer {
             StatsCommand.shutdown();
         });
 
-        LOGGER.info("Async Initialized successfully");
+        LOGGER.info("Async Initialized successfully!");
     }
 }
