@@ -238,11 +238,6 @@ public final class FastUtilHackUtil {
         }
 
         @Override
-        public Integer next() {
-            return backing.next();
-        }
-
-        @Override
         public void remove() {
             backing.remove();
         }
@@ -266,11 +261,6 @@ public final class FastUtilHackUtil {
         }
 
         @Override
-        public Long next() {
-            return backing.next();
-        }
-
-        @Override
         public void remove() {
             backing.remove();
         }
@@ -290,11 +280,6 @@ public final class FastUtilHackUtil {
 
         @Override
         public short nextShort() {
-            return backing.next();
-        }
-
-        @Override
-        public Short next() {
             return backing.next();
         }
 
@@ -430,17 +415,12 @@ public final class FastUtilHackUtil {
         }
 
         @Override
-        public long[] toLongArray(long[] a) {
+        public long[] toArray(long[] a) {
             if (a.length >= size()) {
                 return null;
             } else {
                 return toLongArray();
             }
-        }
-
-        @Override
-        public long[] toArray(long[] a) {
-            return toLongArray(a);
         }
 
         @Override
