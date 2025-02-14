@@ -36,13 +36,6 @@ public abstract class GoalSelectorMixin {
         }
     }
 
-    @WrapMethod(method = "add")
-    private void add(int priority, Goal goal, Operation<Void> original) {
-        synchronized (lock) {
-            original.call(priority, goal);
-        }
-    }
-
     @WrapMethod(method = "remove")
     private void remove(Goal goal, Operation<Void> original) {
         synchronized (lock) {
