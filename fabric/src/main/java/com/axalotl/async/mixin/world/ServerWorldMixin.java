@@ -24,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -45,13 +44,6 @@ public abstract class ServerWorldMixin extends World implements StructureWorldAc
     private void init(CallbackInfo ci) {
         loadedMobs = ConcurrentCollections.newHashSet();
         syncedBlockEventQueue = new ConcurrentLinkedQueue<>();
-    }
-
-    @Inject(method = "tick", at = @At(value = "TAIL", target = "Lnet/minecraft/world/EntityList;forEach(Ljava/util/function/Consumer;)V"))
-    private void afterTickEntity(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-        if ((Object) this instanceof ServerWorld) {
-            ParallelProcessor.postEntityTick();
-        }
     }
 
     @Redirect(method = "method_31420", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tickEntity(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"))
