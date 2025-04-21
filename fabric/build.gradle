@@ -11,6 +11,7 @@ base {
 }
 
 repositories {
+    maven { url = "https://api.modrinth.com/maven" }
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://maven.terraformersmc.com/releases/" }
     maven { url = "https://jitpack.io" }
@@ -34,9 +35,7 @@ dependencies {
     include group: 'com.electronwill.night-config', name: 'core', version: '3.8.1'
 
     // Mods
-    modCompileOnly files('C:/c2me-opts-chunk-access-mc1.20.1-0.2.0+alpha.11.13.jar')
-    modCompileOnly files('C:/c2me-fixes-worldgen-threading-issues-mc1.20.1-0.2.0+alpha.11.13.jar')
-    modCompileOnly files('C:/c2me-fixes-general-threading-issues-mc1.20.1-0.2.0+alpha.11.13.jar')
+    modCompileOnly files('libs/c2me-fabric-mc1.20.1-0.2.0+alpha.11.16.jar')
 }
 
 processResources {
