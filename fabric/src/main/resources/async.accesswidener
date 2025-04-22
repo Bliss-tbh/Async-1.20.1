@@ -5,6 +5,7 @@ accessible field net/minecraft/world/chunk/WorldChunk$WrappedBlockEntityTickInvo
 accessible field net/minecraft/world/chunk/WorldChunk$DirectBlockEntityTickInvoker blockEntity Lnet/minecraft/block/entity/BlockEntity;
 accessible method net/minecraft/server/world/ServerWorld processBlockEvent (Lnet/minecraft/server/world/BlockEvent;)Z
 accessible method net/minecraft/server/world/ServerChunkManager getChunkHolder (J)Lnet/minecraft/server/world/ChunkHolder;
+accessible class net/minecraft/world/BlockEventData
 accessible method net/minecraft/server/world/ServerChunkManager$MainThreadExecutor runTask ()Z
 accessible method net/minecraft/world/World tickBlockEntities ()V
 accessible method net/minecraft/server/world/ThreadedAnvilChunkStorage shouldTick (Lnet/minecraft/util/math/ChunkPos;)Z

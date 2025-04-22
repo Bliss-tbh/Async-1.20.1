@@ -10,7 +10,7 @@ import net.minecraft.command.synchronization.SuggestionProviders;
 import net.minecraft.text.Text;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Identifier;
-import net.minecraft.command.arguments.ResourceLocationArgument;
+import net.minecraft.command.arguments.IdentifierArgumentType;
 
 import java.util.Set;
 
@@ -24,88 +24,88 @@ public class ConfigCommand {
                 .then(literal("toggle").requires(cmdSrc -> cmdSrc.hasPermission(4)).executes(cmdCtx -> {
                     AsyncConfig.disabled = !AsyncConfig.disabled;
                     AsyncConfig.saveConfig();
-                    MutableComponent message = prefix.copy().append(Component.literal("Async is now ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                            .append(Component.literal(AsyncConfig.disabled ? "disabled" : "enabled").withStyle(style -> style.withColor(ChatFormatting.GREEN)));
-                    cmdCtx.getSource().sendSuccess(() -> message, true);
+                    MutableText message = prefix.copy().append(Text.literal("Async is now ").styled(style -> style.withColor(Formatting.WHITE)))
+                            .append(Text.literal(AsyncConfig.disabled ? "disabled" : "enabled").styled(style -> style.withColor(Formatting.GREEN)));
+                    cmdCtx.getSource().sendFeedback(() -> message, true);
                     return 1;
                 }))
                 .then(literal("synchronizedEntities")
 
                         .requires(cmdSrc -> cmdSrc.hasPermission(4))
                         .executes(cmdCtx -> {
-                            Set<ResourceLocation> currentValue = AsyncConfig.synchronizedEntities;
-                            MutableComponent message = prefix.copy().append(Component.literal("Synchronized Entities: ").withStyle(style -> style.withColor(ChatFormatting.WHITE)));
+                            Set<Identifier> currentValue = AsyncConfig.synchronizedEntities;
+                            MutableText message = prefix.copy().append(Text.literal("Synchronized Entities: ").styled(style -> style.withColor(Formatting.WHITE)));
                             if (currentValue.isEmpty()) {
-                                message.append(Component.literal("No entities synchronized.").withStyle(style -> style.withColor(ChatFormatting.RED)));
+                                message.append(Text.literal("No entities synchronized.").styled(style -> style.withColor(Formatting.RED)));
                             } else {
-                                message.append(Component.literal("\n").withStyle(style -> style.withColor(ChatFormatting.WHITE)));
-                                for (ResourceLocation entity : currentValue) {
-                                    message.append(Component.literal("- ").withStyle(style -> style.withColor(ChatFormatting.GREEN)))
-                                            .append(Component.literal(entity.toString()).withStyle(style -> style.withColor(ChatFormatting.YELLOW)))
-                                            .append(Component.literal("\n"));
+                                message.append(Text.literal("\n").styled(style -> style.withColor(Formatting.WHITE)));
+                                for (Identifier entity : currentValue) {
+                                    message.append(Text.literal("- ").styled(style -> style.withColor(Formatting.GREEN)))
+                                            .append(Text.literal(entity.toString()).styled(style -> style.withColor(Formatting.YELLOW)))
+                                            .append(Text.literal("\n"));
                                 }
                             }
-                            cmdCtx.getSource().sendSuccess(() -> message, false);
+                            cmdCtx.getSource().sendFeedback(() -> message, false);
                             return 1;
                         })
                         .then(literal("add")
-                                .then(Commands.argument("entity", ResourceLocationArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(cmdCtx -> {
-                                    ResourceLocation id = ResourceLocationArgument.getId(cmdCtx, "entity");
+                                .then(Commands.argument("entity", IdentifierArgumentType.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(cmdCtx -> {
+                                    Identifier id = IdentifierArgumentType.getId(cmdCtx, "entity");
                                     if (AsyncConfig.synchronizedEntities.contains(id)) {
-                                        MutableComponent message = prefix.copy()
-                                                .append(Component.literal("Error entity class ").withStyle(style -> style.withColor(ChatFormatting.RED)))
-                                                .append(Component.literal(id.toString()).withStyle(style -> style.withColor(ChatFormatting.RED)))
-                                                .append(Component.literal(" is already synchronized.").withStyle(style -> style.withColor(ChatFormatting.RED)));
-                                        cmdCtx.getSource().sendSuccess(() -> message, true);
+                                        MutableText message = prefix.copy()
+                                                .append(Text.literal("Error entity class ").styled(style -> style.withColor(Formatting.RED)))
+                                                .append(Text.literal(id.toString()).styled(style -> style.withColor(Formatting.RED)))
+                                                .append(Text.literal(" is already synchronized.").styled(style -> style.withColor(Formatting.RED)));
+                                        cmdCtx.getSource().sendFeedback(() -> message, true);
                                         return 1;
                                     }
                                     AsyncConfig.syncEntity(id);
-                                    MutableComponent message = prefix.copy()
-                                            .append(Component.literal("Entity class ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                                            .append(Component.literal(id.toString()).withStyle(style -> style.withColor(ChatFormatting.GREEN)))
-                                            .append(Component.literal(" has been added to the synchronized list.").withStyle(style -> style.withColor(ChatFormatting.WHITE)));
-                                    cmdCtx.getSource().sendSuccess(() -> message, true);
+                                    MutableText message = prefix.copy()
+                                            .append(Text.literal("Entity class ").styled(style -> style.withColor(Formatting.WHITE)))
+                                            .append(Text.literal(id.toString()).styled(style -> style.withColor(Formatting.GREEN)))
+                                            .append(Text.literal(" has been added to the synchronized list.").styled(style -> style.withColor(Formatting.WHITE)));
+                                    cmdCtx.getSource().sendFeedback(() -> message, true);
                                     return 1;
                                 })))
                         .then(literal("remove")
-                                .then(Commands.argument("entity", ResourceLocationArgument.id())
+                                .then(Commands.argument("entity", IdentifierArgumentType.id())
                                         .suggests((context, builder) -> {
                                             AsyncConfig.synchronizedEntities.forEach(id -> builder.suggest(id.toString()));
                                             return builder.buildFuture();
                                         })
                                         .executes(cmdCtx -> {
-                                            ResourceLocation identifier = cmdCtx.getArgument("entity", ResourceLocation.class);
+                                            Identifier identifier = cmdCtx.getArgument("entity", Identifier.class);
                                             if (!AsyncConfig.synchronizedEntities.contains(identifier)) {
-                                                MutableComponent message = prefix.copy()
-                                                        .append(Component.literal("Error entity class ").withStyle(style -> style.withColor(ChatFormatting.RED)))
-                                                        .append(Component.literal(identifier.toString()).withStyle(style -> style.withColor(ChatFormatting.RED)))
-                                                        .append(Component.literal(" is not in the synchronized list.").withStyle(style -> style.withColor(ChatFormatting.RED)));
-                                                cmdCtx.getSource().sendSuccess(() -> message, true);
+                                                MutableText message = prefix.copy()
+                                                        .append(Text.literal("Error entity class ").styled(style -> style.withColor(Formatting.RED)))
+                                                        .append(Text.literal(identifier.toString()).styled(style -> style.withColor(Formatting.RED)))
+                                                        .append(Text.literal(" is not in the synchronized list.").styled(style -> style.withColor(Formatting.RED)));
+                                                cmdCtx.getSource().sendFeedback(() -> message, true);
                                                 return 1;
                                             }
                                             AsyncConfig.asyncEntity(identifier);
-                                            MutableComponent message = prefix.copy()
-                                                    .append(Component.literal("Entity class ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                                                    .append(Component.literal(identifier.toString()).withStyle(style -> style.withColor(ChatFormatting.GREEN)))
-                                                    .append(Component.literal(" has been removed from synchronized list.").withStyle(style -> style.withColor(ChatFormatting.WHITE)));
-                                            cmdCtx.getSource().sendSuccess(() -> message, true);
+                                            MutableText message = prefix.copy()
+                                                    .append(Text.literal("Entity class ").styled(style -> style.withColor(Formatting.WHITE)))
+                                                    .append(Text.literal(identifier.toString()).styled(style -> style.withColor(Formatting.GREEN)))
+                                                    .append(Text.literal(" has been removed from synchronized list.").styled(style -> style.withColor(Formatting.WHITE)));
+                                            cmdCtx.getSource().sendFeedback(() -> message, true);
                                             return 1;
                                         }))))
                 .then(Commands.literal("setEntityMoveSync").requires(cmdSrc -> cmdSrc.hasPermission(4))
                         .executes(cmdCtx -> {
                             boolean currentValue = AsyncConfig.enableEntityMoveSync;
-                            MutableComponent message = prefix.copy().append(Component.literal("Current value of entity move sync: ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                                    .append(Component.literal(String.valueOf(currentValue)).withStyle(style -> style.withColor(ChatFormatting.GREEN)));
-                            cmdCtx.getSource().sendSuccess(() -> message, false);
+                            MutableText message = prefix.copy().append(Text.literal("Current value of entity move sync: ").styled(style -> style.withColor(Formatting.WHITE)))
+                                    .append(Text.literal(String.valueOf(currentValue)).styled(style -> style.withColor(Formatting.GREEN)));
+                            cmdCtx.getSource().sendFeedback(() -> message, false);
                             return 1;
                         })
                         .then(argument("value", BoolArgumentType.bool()).executes(cmdCtx -> {
                             boolean value = BoolArgumentType.getBool(cmdCtx, "value");
                             AsyncConfig.enableEntityMoveSync = value;
                             AsyncConfig.saveConfig();
-                            MutableComponent message = prefix.copy().append(Component.literal("Entity move sync set to ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                                    .append(Component.literal(String.valueOf(value)).withStyle(style -> style.withColor(ChatFormatting.GREEN)));
-                            cmdCtx.getSource().sendSuccess(() -> message, true);
+                            MutableText message = prefix.copy().append(Text.literal("Entity move sync set to ").styled(style -> style.withColor(Formatting.WHITE)))
+                                    .append(Text.literal(String.valueOf(value)).styled(style -> style.withColor(Formatting.GREEN)));
+                            cmdCtx.getSource().sendFeedback(() -> message, true);
                             return 1;
                         }))));
     }

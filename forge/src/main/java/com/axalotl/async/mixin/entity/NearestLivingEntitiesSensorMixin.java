@@ -1,10 +1,10 @@
 package com.axalotl.async.mixin.entity;
 
-import net.minecraft.world.World;
-import net.minecraft.entity.*
-import net.minecraft.entity.*
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.sensing.NearestLivingEntitySensor;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.entity.*
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -19,7 +19,7 @@ public class NearestLivingEntitiesSensorMixin {
 
     @Redirect(method = "doTick",
             at = @At(value = "INVOKE", target = "Ljava/util/Comparator;comparingDouble(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;"))
-    private Comparator<LivingEntity> doTick(ToDoubleFunction<? super LivingEntity> keyExtractor, ServerLevel world, LivingEntity entity) {
+    private Comparator<LivingEntity> doTick(ToDoubleFunction<? super LivingEntity> keyExtractor, ServerWorld world, LivingEntity entity) {
         Map<LivingEntity, Vec3> positionCache = new HashMap<>();
         return (entity1, entity2) -> {
             Vec3 pos1 = positionCache.computeIfAbsent(entity1, Entity::position);

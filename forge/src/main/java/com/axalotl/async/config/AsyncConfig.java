@@ -19,10 +19,10 @@ public class AsyncConfig {
     public static boolean disabled = false;
     public static int paraMax = -1;
     public static boolean enableEntityMoveSync = false;
-    public static Set<ResourceLocation> synchronizedEntities = new HashSet<>(Set.of(
-            Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "tnt")),
-            Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "item")),
-            Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "experience_orb"))
+    public static Set<Identifier> synchronizedEntities = new HashSet<>(Set.of(
+            Objects.requireNonNull(Identifier.tryBuild("minecraft", "tnt")),
+            Objects.requireNonNull(Identifier.tryBuild("minecraft", "item")),
+            Objects.requireNonNull(Identifier.tryBuild("minecraft", "experience_orb"))
     ));
 
     private static final ForgeConfigSpec.ConfigValue<Boolean> disabledv;
@@ -40,7 +40,7 @@ public class AsyncConfig {
                 .define("paraMax", -1);
 
         synchronizedEntitiesv = BUILDER.comment("Disables Item entity parallelization.")
-                .define("synchronizedEntities", synchronizedEntities.stream().map(ResourceLocation::toString).toList());
+                .define("synchronizedEntities", synchronizedEntities.stream().map(Identifier::toString).toList());
 
         enableEntityMoveSyncv = BUILDER.comment("Modifies entity movement processing: true for synchronous movement (vanilla mechanics intact, less performance), false for asynchronous movement (better performance, may break mechanics).")
                 .define("enableEntityMoveSync", false);
@@ -56,15 +56,15 @@ public class AsyncConfig {
         synchronizedEntities = new HashSet<>();
         SPEC.getSpec().<List<String>>getOptional("synchronizedEntities").ifPresentOrElse(ids -> {
             for (String id : ids) {
-                ResourceLocation resourceLocation = ResourceLocation.tryParse(id);
-                if (resourceLocation != null) {
-                    synchronizedEntities.add(resourceLocation);
+                Identifier Identifier = Identifier.tryParse(id);
+                if (Identifier != null) {
+                    synchronizedEntities.add(Identifier);
                 }
             }
         }, () -> synchronizedEntities = new HashSet<>(Set.of(
-                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "tnt")),
-                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "item")),
-                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "experience_orb"))
+                Objects.requireNonNull(Identifier.tryBuild("minecraft", "tnt")),
+                Objects.requireNonNull(Identifier.tryBuild("minecraft", "item")),
+                Objects.requireNonNull(Identifier.tryBuild("minecraft", "experience_orb"))
         )));
         enableEntityMoveSync = enableEntityMoveSyncv.get();
         LOGGER.info("Config Casted");
@@ -73,7 +73,7 @@ public class AsyncConfig {
     public static void saveConfig() {
         disabledv.set(disabled);
         paraMaxv.set(paraMax);
-        synchronizedEntitiesv.set(synchronizedEntities.stream().map(ResourceLocation::toString).toList());
+        synchronizedEntitiesv.set(synchronizedEntities.stream().map(Identifier::toString).toList());
         enableEntityMoveSyncv.set(enableEntityMoveSync);
         LOGGER.info("Configuration successfully saved.");
     }
@@ -83,7 +83,7 @@ public class AsyncConfig {
         return Math.max(1, Math.min(Runtime.getRuntime().availableProcessors(), paraMax));
     }
 
-    public static void syncEntity(ResourceLocation entityId) {
+    public static void syncEntity(Identifier entityId) {
         if (synchronizedEntities.add(entityId)) {
             saveConfig();
             LOGGER.info("Sync entity class: {}", entityId);
@@ -91,7 +91,7 @@ public class AsyncConfig {
             LOGGER.warn("Entity class already synchronized: {}", entityId);
         }
     }
-    public static void asyncEntity(ResourceLocation entityId) {
+    public static void asyncEntity(Identifier entityId) {
         if (synchronizedEntities.remove(entityId)) {
             saveConfig();
             LOGGER.info("Enable async process entity class: {}", entityId);

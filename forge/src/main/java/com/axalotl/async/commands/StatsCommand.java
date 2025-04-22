@@ -46,24 +46,24 @@ public class StatsCommand {
         double avgThreads = calculateAverageThreads();
         double threadUtilization = (avgThreads / availableProcessors) * 100.0;
 
-        MutableComponent message = prefix.copy()
-                .append(Component.literal("Performance Statistics ").withStyle(style -> style.withColor(ChatFormatting.GOLD)))
-                .append(Component.literal("\nActive Processing Threads: ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                .append(Component.literal(DECIMAL_FORMAT.format(avgThreads)).withStyle(style -> style.withColor(ChatFormatting.GREEN)))
-                .append(Component.literal(" / " + availableProcessors).withStyle(style -> style.withColor(ChatFormatting.GRAY)))
-                .append(Component.literal("\nThread Utilization: ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                .append(Component.literal(DECIMAL_FORMAT.format(threadUtilization) + "%").withStyle(style -> style.withColor(ChatFormatting.GREEN)))
-                .append(Component.literal("\nAsync Status: ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                .append(Component.literal(AsyncConfig.disabled ? "Disabled" : "Enabled").withStyle(style ->
-                        style.withColor(AsyncConfig.disabled ? ChatFormatting.RED : ChatFormatting.GREEN)));
+        MutableText message = prefix.copy()
+                .append(Text.literal("Performance Statistics ").styled(style -> style.withColor(Formatting.GOLD)))
+                .append(Text.literal("\nActive Processing Threads: ").styled(style -> style.withColor(Formatting.WHITE)))
+                .append(Text.literal(DECIMAL_FORMAT.format(avgThreads)).styled(style -> style.withColor(Formatting.GREEN)))
+                .append(Text.literal(" / " + availableProcessors).styled(style -> style.withColor(Formatting.GRAY)))
+                .append(Text.literal("\nThread Utilization: ").styled(style -> style.withColor(Formatting.WHITE)))
+                .append(Text.literal(DECIMAL_FORMAT.format(threadUtilization) + "%").styled(style -> style.withColor(Formatting.GREEN)))
+                .append(Text.literal("\nAsync Status: ").styled(style -> style.withColor(Formatting.WHITE)))
+                .append(Text.literal(AsyncConfig.disabled ? "Disabled" : "Enabled").styled(style ->
+                        style.withColor(AsyncConfig.disabled ? Formatting.RED : Formatting.GREEN)));
 
-        source.sendSuccess(() -> message, true);
+        source.sendFeedback(() -> message, true);
     }
 
     private static void showEntityStats(ServerCommandSource source) {
         MinecraftServer server = source.getServer();
-        MutableComponent message = prefix.copy()
-                .append(Component.literal("Entity Statistics ").withStyle(style -> style.withColor(ChatFormatting.GOLD)));
+        MutableText message = prefix.copy()
+                .append(Text.literal("Entity Statistics ").styled(style -> style.withColor(Formatting.GOLD)));
 
         AtomicInteger totalEntities = new AtomicInteger(0);
         AtomicInteger totalAsyncEntities = new AtomicInteger(0);
@@ -84,20 +84,20 @@ public class StatsCommand {
                 }
             });
 
-            message.append(Component.literal("\n" + worldName + ": ").withStyle(style -> style.withColor(ChatFormatting.YELLOW)))
-                    .append(Component.literal(String.valueOf(worldCount.get())).withStyle(style -> style.withColor(ChatFormatting.GREEN)))
-                    .append(Component.literal(" entities (").withStyle(style -> style.withColor(ChatFormatting.GRAY)))
-                    .append(Component.literal(String.valueOf(asyncCount.get())).withStyle(style -> style.withColor(ChatFormatting.AQUA)))
-                    .append(Component.literal(" async)").withStyle(style -> style.withColor(ChatFormatting.GRAY)));
+            message.append(Text.literal("\n" + worldName + ": ").styled(style -> style.withColor(Formatting.YELLOW)))
+                    .append(Text.literal(String.valueOf(worldCount.get())).styled(style -> style.withColor(Formatting.GREEN)))
+                    .append(Text.literal(" entities (").styled(style -> style.withColor(Formatting.GRAY)))
+                    .append(Text.literal(String.valueOf(asyncCount.get())).styled(style -> style.withColor(Formatting.AQUA)))
+                    .append(Text.literal(" async)").styled(style -> style.withColor(Formatting.GRAY)));
         });
 
-        message.append(Component.literal("\nTotal Entities: ").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
-                .append(Component.literal(String.valueOf(totalEntities.get())).withStyle(style -> style.withColor(ChatFormatting.GOLD)))
-                .append(Component.literal(" (").withStyle(style -> style.withColor(ChatFormatting.GRAY)))
-                .append(Component.literal(String.valueOf(totalAsyncEntities.get())).withStyle(style -> style.withColor(ChatFormatting.AQUA)))
-                .append(Component.literal(" async)").withStyle(style -> style.withColor(ChatFormatting.GRAY)));
+        message.append(Text.literal("\nTotal Entities: ").styled(style -> style.withColor(Formatting.WHITE)))
+                .append(Text.literal(String.valueOf(totalEntities.get())).styled(style -> style.withColor(Formatting.GOLD)))
+                .append(Text.literal(" (").styled(style -> style.withColor(Formatting.GRAY)))
+                .append(Text.literal(String.valueOf(totalAsyncEntities.get())).styled(style -> style.withColor(Formatting.AQUA)))
+                .append(Text.literal(" async)").styled(style -> style.withColor(Formatting.GRAY)));
 
-        source.sendSuccess(() -> message, true);
+        source.sendFeedback(() -> message, true);
     }
 
     private static double calculateAverageThreads() {
