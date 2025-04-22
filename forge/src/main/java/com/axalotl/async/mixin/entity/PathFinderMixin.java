@@ -4,9 +4,9 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world..PathNavigationRegion;
-import net.minecraft.world..pathfinder.Path;
-import net.minecraft.world..pathfinder.PathFinder;
+import net.minecraft.world.PathNavigationRegion;
+import net.minecraft.world.pathfinder.Path;
+import net.minecraft.world.pathfinder.PathFinder;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 

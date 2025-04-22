@@ -3,7 +3,7 @@ package com.axalotl.async.mixin.c2me;
 import com.axalotl.async.ParallelProcessor;
 import com.ishland.c2me.fixes.worldgen.threading_issues.common.CheckedThreadLocalRandom;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world..levelgen.SingleThreadedRandomSource;
+import net.minecraft.world.levelgen.SingleThreadedRandomSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

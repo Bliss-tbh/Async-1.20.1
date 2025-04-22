@@ -8,7 +8,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world..ChunkPos;
+import net.minecraft.world.ChunkPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;

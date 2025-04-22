@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.server.world.ChunkMap;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world..chunk.storage.ChunkStorage;
+import net.minecraft.world.chunk.storage.ChunkStorage;
 import net.minecraft.server.world.ChunkHolder;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
