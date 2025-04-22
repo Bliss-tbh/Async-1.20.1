@@ -87,10 +87,8 @@ repositories {
 }
 
 dependencies {
-
     //Minecraft
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
     // Lombok (Getters/Setters)
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
@@ -111,9 +109,9 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Mods
-    compileOnly files('C:/c2me-fabric-mc1.20.1-0.2.0+alpha.11.13$c2me-fixes-general-threading-issues.jar')
-    compileOnly files('C:/c2me-fabric-mc1.20.1-0.2.0+alpha.11.13$c2me-fixes-worldgen-threading-issues.jar')
-    compileOnly files('C:/c2me-fabric-mc1.20.1-0.2.0+alpha.11.13$c2me-opts-chunk-access.jar')
+    compileOnly files('C:/minecraftdev/c2me-fixes-general-threading-issues-mc1.20.1-0.2.0+alpha.11.goofy.jar')
+    compileOnly files('C:/minecraftdev/c2me-fixes-worldgen-threading-issues-mc1.20.1-0.2.0+alpha.11.goofy.jar')
+    compileOnly files('C:/minecraftdev/c2me-opts-chunk-access-mc1.20.1-0.2.0+alpha.11.goofy.jar')
 
 }
 
@@ -131,19 +129,20 @@ tasks.named('processResources', ProcessResources).configure {
     }
 }
 
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes(["Specification-Title"     : mod_id,
-                    "Specification-Vendor"    : mod_authors,
-                    "Specification-Version"   : "1", // We are version 1 of ourselves
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : project.jar.archiveVersion,
-                    "Implementation-Vendor"   : mod_authors,
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")])
-    }
+// tasks.named('jar', Jar).configure {
+//     manifest {
+//         attributes(["Specification-Title"     : mod_id,
+//                     "Specification-Vendor"    : mod_authors,
+//                     "Specification-Version"   : "1", // We are version 1 of ourselves
+//                     "Implementation-Title"    : project.name,
+//                     "Implementation-Version"  : project.jar.archiveVersion,
+//                     "Implementation-Vendor"   : mod_authors,
+//                     "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")])
+//     }
 
-    finalizedBy 'reobfJar'
-}
+//     finalizedBy 'reobfJar'
+//     enabled = false
+// }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'

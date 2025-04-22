@@ -16,24 +16,26 @@ repositories {
     maven { url = "https://jitpack.io" }
     maven { url = "https://maven.bawnorton.com/releases" }
     mavenCentral()
+    mavenLocal()
 }
 
-def c2meName = "c2me-fabric-mc1.20.1-0.2.0+alpha.11.16.jar"
-def c2meUrl = "https://ci.codemc.io/job/RelativityMC/job/C2ME-fabric/lastSuccessfulBuild/artifact/build/libs/${c2meName}"
+// dynamical download latest c2me succesfullbuild (attention URL is an false positive issue on IDE)
+def jenkinsBase = "https://ci.codemc.io/job/RelativityMC/job/C2ME-fabric/job/ver%252F1.20.1/lastSuccessfulBuild/artifact/build/libs/"
+def jenkinsPage = new URL(jenkinsBase).text
+def c2meName = (jenkinsPage =~ /href="([^"]+\.jar)"/)[0][1]
+def c2meUrl = "${jenkinsBase}${c2meName}"
 def c2meFile = file("libs/${c2meName}")
 
-tasks.register("downloadC2ME") {
-    doLast {
-        if (!c2meFile.exists()) {
-            println "Downloading C2ME from Jenkins..."
-            new java.net.URL(c2meUrl).withInputStream { i ->
-                c2meFile.withOutputStream { it << i }
-            }
-            println "Downloaded: ${c2meFile.name}"
-        } else {
-            println "C2ME already downloaded."
-        }
+// download before dependencies
+if (!c2meFile.exists()) {
+    println ">>> Downloading latest successfull build C2ME from Jenkins: $c2meName"
+    if (!c2meFile.parentFile.exists()) {
+        c2meFile.parentFile.mkdirs()
     }
+    def input = new URL(c2meUrl).openStream()
+    c2meFile.withOutputStream { it << input }
+    input.close()
+    println ">>> Downloaded: ${c2meFile.name}"
 }
 
 dependencies {
@@ -42,7 +44,6 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
     // Utils
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
@@ -52,7 +53,7 @@ dependencies {
     include group: 'com.electronwill.night-config', name: 'core', version: '3.8.1'
 
     // Mods
-    modCompileOnly files("libs/${c2meName}")
+    runtimeOnly files("libs/${c2meName}")
 }
 
 processResources {
@@ -64,11 +65,13 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    dependsOn "downloadC2ME"
     it.options.release = 17
 }
 
 java {
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
     withSourcesJar()
 
     sourceCompatibility = JavaVersion.VERSION_17
@@ -79,7 +82,16 @@ loom {
     accessWidenerPath = file("src/main/resources/async.accesswidener")
 }
 
-tasks.register("prepareKotlinBuildScriptModel"){}
+tasks.register("deleteC2ME") {
+    doLast {
+        if (c2meFile.exists()) {
+            println "Deleting C2ME JAR: ${c2meFile.name}"
+            c2meFile.delete()
+        } else {
+            println "No C2ME JAR found to delete."
+        }
+    }
+}
 
 jar {
     from("LICENSE") {
@@ -87,11 +99,31 @@ jar {
     }
 }
 
+// delete c2me after compile, but before package!!
+tasks.named("compileJava").configure {
+    finalizedBy "deleteC2ME"
+}
+tasks.named("remapJar").configure {
+    mustRunAfter "deleteC2ME"
+}
+tasks.named("jar").configure {
+    mustRunAfter "deleteC2ME"
+}
+
 publishing {
-    publications {
-        create("mavenJava", MavenPublication) {
-            artifactId = project.archives_base_name
-            from components.java
+    publishing {
+        publications {
+            create("mavenJava", MavenPublication) {
+                artifactId = project.archives_base_name
+                from components.java
+            }
+        }
+        // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+        repositories {
+            // Add repositories to publish to here.
+            // Notice: This block does NOT have the same function as the block in the top level.
+            // The repositories here will be used for publishing your artifact, not for
+            // retrieving dependencies.
         }
     }
 }
