@@ -1,6 +1,6 @@
 package com.axalotl.async.config;
 
-import net.minecraft.util.IdentifierResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -3,8 +3,8 @@ package com.axalotl.async.commands;
 import com.axalotl.async.ParallelProcessor;
 import com.axalotl.async.config.AsyncConfig;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import et.minecraft.util.Formatting;
-import net.minecraft.command.CommandSourceStack;
+import net.minecraft.util.Formatting;
+import net.minecraft.server.command.CommandManagerourceStack;
 import net.minecraft.text.Component;
 import net.minecraft.text.MutableComponent;
 import net.minecraft.server.MinecraftServer;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.axalotl.async.commands.AsyncCommand.prefix;
-import static net.minecraft.command.Commands.literal;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public class StatsCommand {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,##0.##");
@@ -26,7 +26,7 @@ public class StatsCommand {
     private static volatile boolean isRunning = true;
     private static Thread statsThread;
 
-    public static LiteralArgumentBuilder<CommandSourceStack> registerStatus(LiteralArgumentBuilder<CommandSourceStack> root) {
+    public static LiteralArgumentBuilder<ServerCommandSource> registerStatus(LiteralArgumentBuilder<ServerCommandSource> root) {
         return root.then(literal("stats")
                 .requires(cmdSrc -> cmdSrc.hasPermission(4))
                 .executes(cmdCtx -> {
@@ -41,7 +41,7 @@ public class StatsCommand {
                         })));
     }
 
-    private static void showGeneralStats(CommandSourceStack source) {
+    private static void showGeneralStats(ServerCommandSource source) {
         int availableProcessors = AsyncConfig.getParallelism();
         double avgThreads = calculateAverageThreads();
         double threadUtilization = (avgThreads / availableProcessors) * 100.0;
@@ -60,7 +60,7 @@ public class StatsCommand {
         source.sendSuccess(() -> message, true);
     }
 
-    private static void showEntityStats(CommandSourceStack source) {
+    private static void showEntityStats(ServerCommandSource source) {
         MinecraftServer server = source.getServer();
         MutableComponent message = prefix.copy()
                 .append(Component.literal("Entity Statistics ").withStyle(style -> style.withColor(ChatFormatting.GOLD)));

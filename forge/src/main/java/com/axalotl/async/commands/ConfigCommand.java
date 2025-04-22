@@ -3,23 +3,23 @@ package com.axalotl.async.commands;
 import com.axalotl.async.config.AsyncConfig;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import et.minecraft.util.Formatting;
-import net.minecraft.command.CommandSourceStack;
-import net.minecraft.command.Commands;
+import net.minecraft.util.Formatting;
+import net.minecraft.server.command.CommandManagerourceStack;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.command.synchronization.SuggestionProviders;
 import net.minecraft.text.Component;
 import net.minecraft.text.MutableComponent;
-import net.minecraft.util.IdentifierResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraft.command.arguments.ResourceLocationArgument;
 
 import java.util.Set;
 
 import static com.axalotl.async.commands.AsyncCommand.prefix;
-import static net.minecraft.command.Commands.literal;
-import static net.minecraft.command.Commands.argument;
+import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.server.command.CommandManager.argument;
 
 public class ConfigCommand {
-    public static LiteralArgumentBuilder<CommandSourceStack> registerConfig(LiteralArgumentBuilder<CommandSourceStack> root) {
+    public static LiteralArgumentBuilder<ServerCommandSource> registerConfig(LiteralArgumentBuilder<ServerCommandSource> root) {
         return root.then(literal("config")
                 .then(literal("toggle").requires(cmdSrc -> cmdSrc.hasPermission(4)).executes(cmdCtx -> {
                     AsyncConfig.disabled = !AsyncConfig.disabled;
