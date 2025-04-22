@@ -5,7 +5,7 @@ import com.axalotl.async.parallelised.ConcurrentCollections;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.world.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.FallingBlockEntity;

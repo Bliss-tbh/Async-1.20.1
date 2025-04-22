@@ -1,9 +1,9 @@
 package com.axalotl.async.mixin.world;
 
 import com.axalotl.async.ParallelProcessor;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.server.world.ServerLevel;
+import net.minecraft.world..Level;
+import net.minecraft.world..LevelAccessor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

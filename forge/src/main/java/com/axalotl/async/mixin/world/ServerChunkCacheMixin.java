@@ -1,10 +1,10 @@
 package com.axalotl.async.mixin.world;
 
 import com.mojang.datafixers.util.Either;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.world.level.chunk.*;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.server.world.ChunkHolder;
+import net.minecraft.server.world.ServerChunkCache;
+import net.minecraft.world..chunk.*;
+import net.minecraft.world..ChunkPos;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

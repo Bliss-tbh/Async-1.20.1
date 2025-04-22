@@ -1,6 +1,6 @@
 package com.axalotl.async.mixin.entity;
 
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.world.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.sensing.NearestLivingEntitySensor;
 import net.minecraft.world.phys.Vec3;

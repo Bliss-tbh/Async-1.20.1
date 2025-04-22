@@ -3,10 +3,10 @@ package com.axalotl.async.commands;
 import com.axalotl.async.ParallelProcessor;
 import com.axalotl.async.config.AsyncConfig;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import et.minecraft.util.Formatting;
+import net.minecraft.command.CommandSourceStack;
+import net.minecraft.text.Component;
+import net.minecraft.text.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 
 import java.text.DecimalFormat;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.axalotl.async.commands.AsyncCommand.prefix;
-import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.command.Commands.literal;
 
 public class StatsCommand {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,##0.##");

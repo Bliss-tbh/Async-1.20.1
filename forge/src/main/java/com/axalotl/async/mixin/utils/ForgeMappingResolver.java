@@ -10,7 +10,7 @@ public class ForgeMappingResolver {
 
     static {
         // Key: className/methodName/descriptor
-        METHOD_MAPPINGS.put("net.minecraft.src.C_2126_/m_62427_/()V", "net.minecraft.world.level.chunk.ChunkStatus.isOrAfter");
+        METHOD_MAPPINGS.put("net.minecraft.src.C_2126_/m_62427_/()V", "net.minecraft.world..chunk.ChunkStatus.isOrAfter");
     }
 
     /**

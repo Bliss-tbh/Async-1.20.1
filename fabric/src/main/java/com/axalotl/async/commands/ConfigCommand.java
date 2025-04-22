@@ -3,20 +3,20 @@ package com.axalotl.async.commands;
 import com.axalotl.async.config.AsyncConfig;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import et.minecraft.util.Formatting;
+import net.minecraft.command.CommandSourceStack;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.ResourceLocationArgument;
+import net.minecraft.command.synchronization.SuggestionProviders;
+import net.minecraft.text.Component;
+import net.minecraft.text.MutableComponent;
+import net.minecraft.util.IdentifierResourceLocation;
 
 import java.util.Set;
 
 import static com.axalotl.async.commands.AsyncCommand.prefix;
-import static net.minecraft.commands.Commands.argument;
-import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.command.Commands.argument;
+import static net.minecraft.command.Commands.literal;
 
 public class ConfigCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> registerConfig(LiteralArgumentBuilder<CommandSourceStack> root) {

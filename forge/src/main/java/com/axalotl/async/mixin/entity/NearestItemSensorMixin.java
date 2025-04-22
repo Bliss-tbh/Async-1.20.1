@@ -1,6 +1,6 @@
 package com.axalotl.async.mixin.entity;
 
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.world.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.sensing.NearestItemSensor;

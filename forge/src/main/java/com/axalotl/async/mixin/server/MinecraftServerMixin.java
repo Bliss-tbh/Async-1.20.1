@@ -1,7 +1,7 @@
 package com.axalotl.async.mixin.server;
 
 import com.axalotl.async.ParallelProcessor;
-import net.minecraft.commands.CommandSource;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;

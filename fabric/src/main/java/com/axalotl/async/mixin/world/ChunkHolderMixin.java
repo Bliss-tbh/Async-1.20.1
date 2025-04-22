@@ -2,10 +2,10 @@ package com.axalotl.async.mixin.world;
 
 import com.axalotl.async.parallelised.fastutil.ConcurrentShortHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.server.world.ChunkHolder;
+import net.minecraft.world..ChunkPos;
+import net.minecraft.world..LevelHeightAccessor;
+import net.minecraft.world..lighting.LevelLightEngine;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

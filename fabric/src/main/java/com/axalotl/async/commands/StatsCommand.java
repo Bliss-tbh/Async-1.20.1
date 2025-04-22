@@ -5,13 +5,13 @@ import com.axalotl.async.config.AsyncConfig;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.ChatFormatting;
+import et.minecraft.util.Formatting;
 import net.minecraft.ResourceLocationException;
-import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.command.CommandSourceStack;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.text.Component;
+import net.minecraft.text.MutableComponent;
+import net.minecraft.util.IdentifierResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.EntityType;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.axalotl.async.commands.AsyncCommand.prefix;
-import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.command.Commands.literal;
 
 public class StatsCommand {
     private static final Logger LOGGER = LogManager.getLogger(StatsCommand.class);

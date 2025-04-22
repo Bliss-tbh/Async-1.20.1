@@ -5,7 +5,7 @@ import com.axalotl.async.commands.StatsCommand;
 import com.axalotl.async.config.AsyncConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
-import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.command.CommandSourceStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
