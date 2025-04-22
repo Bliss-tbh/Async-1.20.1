@@ -2,11 +2,11 @@ package com.axalotl.async.mixin.entity;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.world.World;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -17,7 +17,7 @@ public abstract class ItemEntityMixin extends Entity {
 
     @Unique
     private static final ReentrantLock async$lock = new ReentrantLock();
-    public ItemEntityMixin(EntityType<?> type, Level world) {
+    public ItemEntityMixin(EntityType<?> type, World world) {
         super(type, world);
     }
 

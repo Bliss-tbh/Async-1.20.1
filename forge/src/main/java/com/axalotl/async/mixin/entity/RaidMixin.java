@@ -14,14 +14,14 @@ public class RaidMixin {
     @Unique
     private static final ReentrantLock async$lock = new ReentrantLock();
 
-    @WrapMethod(method = "addWaveMob(ILnet/minecraft/world/entity/raid/Raider;)Z")
+    @WrapMethod(method = "addWaveMob(ILnet.minecraft.entity.*
     private boolean addWaveMob(int wave, Raider entity, Operation<Boolean> original) {
         synchronized (async$lock) {
             return original.call(wave, entity);
         }
     }
 
-    @WrapMethod(method = "addWaveMob(ILnet/minecraft/world/entity/raid/Raider;Z)Z")
+    @WrapMethod(method = "addWaveMob(ILnet.minecraft.entity.*
     private boolean addWaveMob(int wave, Raider entity, boolean countHealth, Operation<Boolean> original) {
         synchronized (async$lock) {
             return original.call(wave, entity, countHealth);

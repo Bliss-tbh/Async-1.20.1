@@ -4,7 +4,7 @@ import com.axalotl.async.parallelised.fastutil.ConcurrentShortHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.world.ChunkPos;
-import net.minecraft.world.LevelHeightAccessor;
+import net.minecraft.world.WorldHeightAccessor;
 import net.minecraft.world.lighting.LevelLightEngine;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;

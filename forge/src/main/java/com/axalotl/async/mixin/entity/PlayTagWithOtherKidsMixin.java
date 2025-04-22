@@ -1,9 +1,11 @@
 package com.axalotl.async.mixin.entity;
 
-import net.minecraft.world.entity.ai.behavior.PlayTagWithOtherKids;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.behavior.PlayTagWithOtherKids;
+import org.spongepowered.asm.mixin.Mixin;
+
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;

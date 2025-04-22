@@ -1,10 +1,10 @@
 package com.axalotl.async.mixin.entity;
 
-import net.minecraft.server.world.ServerLevel;
+import net.minecraft.world.World;
 import net.minecraft.server.world.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.sensing.PlayerSensor;
+import net.minecraft.entity.*
+import net.minecraft.entity.*
+import net.minecraft.entity.*
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

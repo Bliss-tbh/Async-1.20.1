@@ -1,7 +1,7 @@
 package com.axalotl.async.mixin.entity;
 
 import com.axalotl.async.parallelised.ConcurrentCollections;
-import net.minecraft.world.entity.ai.gossip.GossipContainer;
+import net.minecraft.entity.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 

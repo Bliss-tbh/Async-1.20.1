@@ -2,8 +2,8 @@ package com.axalotl.async.mixin.entity;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.server.world.ServerLevel;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.world.World;
 import net.minecraft.world.entity.npc.Villager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,7 +25,7 @@ public class VillagerMixin {
     }
 
     @WrapMethod(method = "spawnGolemIfNeeded")
-    private void spawnGolemIfNeeded(ServerLevel world, long time, int requiredCount, Operation<Void> original) {
+    private void spawnGolemIfNeeded(ServerWorld world, long time, int requiredCount, Operation<Void> original) {
         synchronized (async$lock) {
             original.call(world, time, requiredCount);
         }

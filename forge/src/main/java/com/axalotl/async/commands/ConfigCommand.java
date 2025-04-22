@@ -4,11 +4,11 @@ import com.axalotl.async.config.AsyncConfig;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.util.Formatting;
-import net.minecraft.server.command.CommandManagerourceStack;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.command.synchronization.SuggestionProviders;
-import net.minecraft.text.Component;
-import net.minecraft.text.MutableComponent;
+import net.minecraft.text.Text;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.command.arguments.ResourceLocationArgument;
 
