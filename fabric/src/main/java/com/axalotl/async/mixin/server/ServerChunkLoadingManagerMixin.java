@@ -1,4 +1,4 @@
-package com.axalotl.async.mixin.world;
+package com.axalotl.async.mixin.server;
 
 import com.axalotl.async.parallelised.fastutil.ConcurrentLongLinkedOpenHashSet;
 import com.axalotl.async.parallelised.fastutil.Int2ObjectConcurrentHashMap;
@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.nio.file.Path;
 
 @Mixin(value = ThreadedAnvilChunkStorage.class, priority = 1500)
-public abstract class ThreadedAnvilChunkStorageMixin extends VersionedChunkStorage implements ChunkHolder.PlayersWatchingChunkProvider {
+public abstract class ServerChunkLoadingManagerMixin extends VersionedChunkStorage implements ChunkHolder.PlayersWatchingChunkProvider {
     @Shadow
     @Final
     @Mutable
@@ -30,7 +30,7 @@ public abstract class ThreadedAnvilChunkStorageMixin extends VersionedChunkStora
     @Mutable
     private LongSet loadedChunks;
 
-    public ThreadedAnvilChunkStorageMixin(Path directory, DataFixer dataFixer, boolean dsync) {
+    public ServerChunkLoadingManagerMixin(Path directory, DataFixer dataFixer, boolean dsync) {
         super(directory, dataFixer, dsync);
     }
 

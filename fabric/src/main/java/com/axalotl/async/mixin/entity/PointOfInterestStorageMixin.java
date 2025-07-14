@@ -12,14 +12,13 @@ import net.minecraft.world.poi.PointOfInterestType;
 import org.spongepowered.asm.mixin.*;
 
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Mixin(PointOfInterestStorage.class)
 public class PointOfInterestStorageMixin {
     @Unique
-    private static final ReentrantLock lock = new ReentrantLock();
+    private static final Object lock = new Object();
 
     @WrapMethod(method = "getInSquare")
     private Stream<PointOfInterest> getInSquare(Predicate<RegistryEntry<PointOfInterestType>> typePredicate, BlockPos pos, int radius, PointOfInterestStorage.OccupationStatus occupationStatus, Operation<Stream<PointOfInterest>> original) {

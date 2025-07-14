@@ -11,13 +11,12 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collector;
 
 @Mixin(value = TypeFilterableList.class)
 public abstract class TypeFilterableListMixin<T> extends AbstractCollection<T> {
     @Unique
-    private static final ReentrantLock lock = new ReentrantLock();
+    private static final Object lock = new Object();
 
     @Shadow
     private final Map<Class<?>, List<T>> elementsByType = new ConcurrentHashMap<>();
@@ -48,6 +47,13 @@ public abstract class TypeFilterableListMixin<T> extends AbstractCollection<T> {
     private <S extends T> Collection<S> getAllOfType(Class<S> type, Operation<Collection<S>> original) {
         synchronized (lock) {
             return original.call(type);
+        }
+    }
+
+    @WrapMethod(method = "iterator")
+    public Iterator<T> iterator(Operation<Iterator<T>> original) {
+        synchronized (lock) {
+            return original.call();
         }
     }
 }

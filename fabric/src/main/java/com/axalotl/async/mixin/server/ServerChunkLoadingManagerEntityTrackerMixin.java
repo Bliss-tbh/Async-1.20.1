@@ -1,10 +1,10 @@
-package com.axalotl.async.mixin.world;
+package com.axalotl.async.mixin.server;
 
 import com.axalotl.async.parallelised.ConcurrentCollections;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.server.world.EntityTrackingListener;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,12 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Set;
 
 @Mixin(value = ThreadedAnvilChunkStorage.EntityTracker.class)
-public class ThreadedAnvilChunkStorageEntityTrackerMixin {
+public class ServerChunkLoadingManagerEntityTrackerMixin {
 
     @Mutable
     @Final
     @Shadow
-    private Set<ServerPlayNetworkHandler> listeners = ConcurrentCollections.newHashSet();
+    private Set<EntityTrackingListener> listeners;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(CallbackInfo ci) {

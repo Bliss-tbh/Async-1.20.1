@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayWithVillagerBabiesTask.class)
 public class PlayWithVillagerBabiesTaskMixin {
+
     @Inject(method = "getInteractionTarget", at = @At("HEAD"), cancellable = true)
     private static void onGetInteractionTarget(LivingEntity baby, CallbackInfoReturnable<LivingEntity> cir) {
         cir.setReturnValue(baby.getBrain().getOptionalRegisteredMemory(MemoryModuleType.INTERACTION_TARGET).orElse(null));

@@ -1,4 +1,4 @@
-package com.axalotl.async.mixin.entity;
+package com.axalotl.async.mixin.server;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -7,23 +7,20 @@ import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 @Mixin(ServerWorld.ServerEntityHandler.class)
 public class ServerEntityHandlerMixin {
-
     @Unique
-    private static final ReentrantLock lock = new ReentrantLock();
+    private static final Object lock = new Object();
 
     @WrapMethod(method = "startTicking(Lnet/minecraft/entity/Entity;)V")
-    private synchronized void startTicking(Entity entity, Operation<Void> original) {
+    private void startTicking(Entity entity, Operation<Void> original) {
         synchronized (lock) {
             original.call(entity);
         }
     }
 
     @WrapMethod(method = "stopTicking(Lnet/minecraft/entity/Entity;)V")
-    private synchronized void stopTicking(Entity entity, Operation<Void> original) {
+    private void stopTicking(Entity entity, Operation<Void> original) {
         synchronized (lock) {
             original.call(entity);
         }

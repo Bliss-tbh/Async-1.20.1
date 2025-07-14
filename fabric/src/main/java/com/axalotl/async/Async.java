@@ -12,13 +12,18 @@ import org.apache.logging.log4j.Logger;
 
 public class Async implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger();
-    public static Boolean c2me = FabricLoader.getInstance().isModLoaded("c2me");
+    public static final boolean VMP = FabricLoader.getInstance().isModLoaded("vmp");
 
     @Override
     public void onInitialize() {
         LOGGER.info("Initializing Async...");
-        c2me = FabricLoader.getInstance().isModLoaded("c2me");
         AsyncConfig.init();
+
+        if (VMP && AsyncConfig.enableAsyncSpawn) {
+            LOGGER.error("Incompatible configuration: Async spawn enabled while VMP mod is active. Crashing to prevent instability.");
+            throw new RuntimeException("Crashing due to VMP mod incompatibility with Async Spawn Configuration.");
+        }
+
         StatsCommand.runStatsThread();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
@@ -36,6 +41,6 @@ public class Async implements ModInitializer {
             StatsCommand.shutdown();
         });
 
-        LOGGER.info("Async Initialized successfully");
+        LOGGER.info("Async Initialized successfully!");
     }
 }

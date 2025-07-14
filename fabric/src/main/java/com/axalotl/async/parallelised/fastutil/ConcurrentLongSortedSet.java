@@ -12,15 +12,13 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * Provides concurrent access and maintains elements in sorted order.
  */
 public final class ConcurrentLongSortedSet implements LongSortedSet {
-    
-    private final ConcurrentSkipListSet<Long> backing;
+
+    private final ConcurrentSkipListSet<Long> backing = new ConcurrentSkipListSet<>();
 
     /**
      * Creates a new empty concurrent sorted set
      */
-    public ConcurrentLongSortedSet() {
-        this.backing = new ConcurrentSkipListSet<>();
-    }
+    public ConcurrentLongSortedSet() {}
 
     /**
      * Creates a new concurrent sorted set containing elements from the given collection
@@ -39,7 +37,7 @@ public final class ConcurrentLongSortedSet implements LongSortedSet {
     }
 
     @Override
-    public LongBidirectionalIterator iterator() {
+    public @NotNull LongBidirectionalIterator iterator() {
         return FastUtilHackUtil.wrap(backing.iterator());
     }
 
@@ -55,38 +53,33 @@ public final class ConcurrentLongSortedSet implements LongSortedSet {
 
     @NotNull
     @Override
-    public Object[] toArray() {
+    public Object @NotNull [] toArray() {
         return backing.toArray();
     }
 
     @NotNull
     @Override
-    public <T> T[] toArray(@NotNull T[] array) {
-        Objects.requireNonNull(array, "Array cannot be null");
+    public <T> T @NotNull [] toArray(@NotNull T @NotNull [] array) {
         return backing.toArray(array);
     }
 
     @Override
     public boolean containsAll(@NotNull Collection<?> collection) {
-        Objects.requireNonNull(collection, "Collection cannot be null");
         return backing.containsAll(collection);
     }
 
     @Override
     public boolean addAll(@NotNull Collection<? extends Long> collection) {
-        Objects.requireNonNull(collection, "Collection cannot be null");
         return backing.addAll(collection);
     }
 
     @Override
     public boolean removeAll(@NotNull Collection<?> collection) {
-        Objects.requireNonNull(collection, "Collection cannot be null");
         return backing.removeAll(collection);
     }
 
     @Override
     public boolean retainAll(@NotNull Collection<?> collection) {
-        Objects.requireNonNull(collection, "Collection cannot be null");
         return backing.retainAll(collection);
     }
 
@@ -107,46 +100,56 @@ public final class ConcurrentLongSortedSet implements LongSortedSet {
 
     @Override
     public long[] toLongArray() {
-        return backing.stream()
-                .mapToLong(Long::longValue)
-                .toArray();
+        return longStream().toArray();
     }
 
     @Override
     public long[] toArray(long[] array) {
-        Objects.requireNonNull(array, "Array cannot be null");
         long[] result = toLongArray();
         if (array.length < result.length) {
             return result;
         }
         System.arraycopy(result, 0, array, 0, result.length);
         if (array.length > result.length) {
-            array[result.length] = 0L; // Set terminating null as per Collection convention
+            array[result.length] = 0L;
         }
         return array;
     }
 
     @Override
     public boolean addAll(LongCollection c) {
-        Objects.requireNonNull(c, "Collection cannot be null");
-        return c.stream().map(backing::add).reduce(false, (a, b) -> a || b);
+        boolean modified = false;
+        for (LongIterator it = c.iterator(); it.hasNext(); ) {
+            if (backing.add(it.nextLong())) {
+                modified = true;
+            }
+        }
+        return modified;
     }
 
     @Override
     public boolean containsAll(LongCollection c) {
-        Objects.requireNonNull(c, "Collection cannot be null");
-        return c.stream().allMatch(this::contains);
+        for (LongIterator it = c.iterator(); it.hasNext(); ) {
+            if (!backing.contains(it.nextLong())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean removeAll(LongCollection c) {
-        Objects.requireNonNull(c, "Collection cannot be null");
-        return c.stream().map(this::remove).reduce(false, (a, b) -> a || b);
+        boolean modified = false;
+        for (LongIterator it = c.iterator(); it.hasNext(); ) {
+            if (backing.remove(it.nextLong())) {
+                modified = true;
+            }
+        }
+        return modified;
     }
 
     @Override
     public boolean retainAll(LongCollection c) {
-        Objects.requireNonNull(c, "Collection cannot be null");
         return backing.retainAll(c);
     }
 
@@ -155,13 +158,10 @@ public final class ConcurrentLongSortedSet implements LongSortedSet {
         return backing.remove(k);
     }
 
-@Override
-public LongSortedSet subSet(long fromElement, long toElement) {
-    // Используем min/max для определения правильного диапазона
-    long actualFromElement = Math.min(fromElement, toElement);
-    long actualToElement = Math.max(fromElement, toElement);
-    return new ConcurrentLongSortedSet(backing.subSet(actualFromElement, actualToElement));
-}
+    @Override
+    public LongSortedSet subSet(long fromElement, long toElement) {
+        return new ConcurrentLongSortedSet(backing.subSet(Math.min(fromElement, toElement), Math.max(fromElement, toElement)));
+    }
 
     @Override
     public LongSortedSet headSet(long toElement) {
@@ -175,30 +175,22 @@ public LongSortedSet subSet(long fromElement, long toElement) {
 
     @Override
     public LongComparator comparator() {
-        return null; // Natural ordering is used
+        return null;
     }
 
     @Override
     public long firstLong() {
-        if (isEmpty()) {
-            throw new IllegalStateException("Set is empty");
-        }
         return backing.first();
     }
 
     @Override
     public long lastLong() {
-        if (isEmpty()) {
-            throw new IllegalStateException("Set is empty");
-        }
         return backing.last();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof LongSortedSet that)) return false;
-        return backing.equals(that);
+        return this == o || (o instanceof LongSortedSet that && backing.equals(that));
     }
 
     @Override

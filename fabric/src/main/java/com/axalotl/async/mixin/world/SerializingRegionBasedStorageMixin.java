@@ -21,13 +21,4 @@ public abstract class SerializingRegionBasedStorageMixin<R> implements AutoClose
     @Shadow
     @Mutable
     private final LongLinkedOpenHashSet unsavedElements = new ConcurrentLongLinkedOpenHashSet();
-
-    //pendingLoads doesn't exist in 1.20.1
-    //loadedChunks doesn't exist in 1.20.1
-
-    //Experimental
-    @WrapMethod(method = "loadDataAt")
-    private synchronized void release(ChunkPos chunkPos, Operation<Void> original) {
-        original.call(chunkPos);
-    }
 }

@@ -17,16 +17,15 @@ import java.util.function.Predicate;
 
 @Mixin(LivingTargetCache.class)
 public class LivingTargetCacheMixin {
-
     @Mutable
     @Shadow
     @Final
     private Predicate<LivingEntity> targetPredicate;
 
     @Inject(method = "<init>(Lnet/minecraft/entity/LivingEntity;Ljava/util/List;)V", at = @At("RETURN"))
-    private void init(LivingEntity owner, List entities, CallbackInfo ci) {
+    private void init(LivingEntity owner, List<LivingEntity> entities, CallbackInfo ci) {
         Object2BooleanOpenHashMap<LivingEntity> object2BooleanOpenHashMap = new Object2BooleanOpenHashMap<>(entities.size());
-        Predicate<LivingEntity> predicate = target -> Sensor.testTargetPredicate(owner, target);
+        Predicate<LivingEntity> predicate = entity -> Sensor.testTargetPredicate(owner, entity);
         this.targetPredicate = entity -> {
             synchronized (object2BooleanOpenHashMap) {
                 return object2BooleanOpenHashMap.computeIfAbsent(entity, predicate);

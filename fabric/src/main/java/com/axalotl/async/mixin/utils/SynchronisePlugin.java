@@ -55,7 +55,6 @@ public class SynchronisePlugin implements IMixinConfigPlugin {
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-        syncLogger.debug(mixin2MethodsExcludeMap.get(mixinClassName));
         Collection<String> targetMethods = mixin2MethodsMap.get(mixinClassName);
         Collection<String> excludedMethods = mixin2MethodsExcludeMap.get(mixinClassName);
 

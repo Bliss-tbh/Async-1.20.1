@@ -16,7 +16,12 @@ accessible class net/minecraft/world/chunk/WorldChunk$DirectBlockEntityTickInvok
 accessible class net/minecraft/world/block/ChainRestrictedNeighborUpdater$Entry
 accessible class net/minecraft/server/world/ServerEntityManager$Listener
 accessible class net/minecraft/village/VillagerGossips$Reputation
-accessible class net/minecraft/world/storage/SerializingRegionBasedStorage$LoadResult
+#accessible class net/minecraft/world/storage/SerializingRegionBasedStorage$LoadResult
 accessible field net/minecraft/server/world/ServerWorld entityList Lnet/minecraft/world/EntityList;
 accessible class net/minecraft/server/world/ServerWorld$ServerEntityHandler
 accessible field net/minecraft/entity/Entity inNetherPortal Z
+accessible class net/minecraft/util/math/GravityField$Point
+accessible class net/minecraft/world/SpawnDensityCapper$DensityCap
+accessible class net/minecraft/block/entity/BeehiveBlockEntity$Bee
+accessible class net/minecraft/entity/passive/TurtleEntity$MateGoal
+accessible method net/minecraft/entity/passive/TurtleEntity setHasEgg (Z)V

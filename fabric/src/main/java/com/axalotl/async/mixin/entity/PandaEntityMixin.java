@@ -7,18 +7,16 @@ import net.minecraft.entity.passive.PandaEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 @Mixin(PandaEntity.class)
 public class PandaEntityMixin {
     @Unique
-    private static final ReentrantLock lock = new ReentrantLock();
+    private static final Object lock = new Object();
 
     @WrapMethod(method = "loot")
-    private void loot(ItemEntity itemEntity, Operation<Void> original) {
+    private void loot(ItemEntity item, Operation<Void> original) {
         synchronized (lock) {
-            if (!itemEntity.isRemoved() && itemEntity.getEntityWorld() != null) {
-                original.call(itemEntity);
+            if (!item.isRemoved()) {
+                original.call(item);
             }
         }
     }

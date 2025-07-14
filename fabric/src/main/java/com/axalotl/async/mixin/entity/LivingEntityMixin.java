@@ -7,17 +7,35 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Mixin(value = LivingEntity.class, priority = 1001)
 public abstract class LivingEntityMixin extends Entity {
+    @Mutable
+    @Shadow
+    @Final
+    private Map<RegistryEntry<StatusEffect>, StatusEffectInstance> activeStatusEffects;
+    @Unique
+    private static final Object lock = new Object();
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void init(EntityType<?> entityType, World world, CallbackInfo ci) {
+        this.activeStatusEffects = new ConcurrentHashMap<>();
     }
 
     @WrapMethod(method = "onDeath")
@@ -30,9 +48,25 @@ public abstract class LivingEntityMixin extends Entity {
         original.call(damageSource, causedByPlayer);
     }
 
+    @WrapMethod(method = "knockback")
+    private void knockback(LivingEntity target, Operation<Void> original) {
+        synchronized (lock) {
+            original.call(target);
+        }
+    }
+
     @WrapMethod(method = "tickStatusEffects")
-    private synchronized void tickStatusEffects(Operation<Void> original) {
-        original.call();
+    private void tickStatusEffects(Operation<Void> original) {
+        synchronized (lock) {
+            original.call();
+        }
+    }
+
+    @WrapMethod(method = "addStatusEffect(Lnet/minecraft/entity/effect/StatusEffectInstance;Lnet/minecraft/entity/Entity;)Z")
+    private boolean addStatusEffect(StatusEffectInstance effect, Entity source, Operation<Boolean> original) {
+        synchronized (lock) {
+            return original.call(effect, source);
+        }
     }
 
     @Inject(method = "isClimbing", at = @At("HEAD"), cancellable = true)

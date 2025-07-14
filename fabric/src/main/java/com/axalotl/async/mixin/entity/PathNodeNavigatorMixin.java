@@ -14,6 +14,7 @@ import java.util.Set;
 
 @Mixin(PathNodeNavigator.class)
 public class PathNodeNavigatorMixin {
+
     @WrapMethod(method = "findPathToAny(Lnet/minecraft/world/chunk/ChunkCache;Lnet/minecraft/entity/mob/MobEntity;Ljava/util/Set;FIF)Lnet/minecraft/entity/ai/pathing/Path;")
     private synchronized @Nullable Path syncFindPathToAny(ChunkCache world, MobEntity mob, Set<BlockPos> positions, float followRange, int distance, float rangeMultiplier, Operation<Path> original) {
         return original.call(world, mob, positions, followRange, distance, rangeMultiplier);

@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'fabric-loom' version '1.11-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -16,6 +16,7 @@ repositories {
     maven { url = "https://jitpack.io" }
     maven { url = "https://maven.bawnorton.com/releases" }
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -32,11 +33,6 @@ dependencies {
     modImplementation 'com.electronwill.night-config:toml:3.8.1'
     include group: 'com.electronwill.night-config', name: 'toml', version: '3.8.1'
     include group: 'com.electronwill.night-config', name: 'core', version: '3.8.1'
-
-    // Mods
-    modCompileOnly files('C:/c2me-opts-chunk-access-mc1.20.1-0.2.0+alpha.11.13.jar')
-    modCompileOnly files('C:/c2me-fixes-worldgen-threading-issues-mc1.20.1-0.2.0+alpha.11.13.jar')
-    modCompileOnly files('C:/c2me-fixes-general-threading-issues-mc1.20.1-0.2.0+alpha.11.13.jar')
 }
 
 processResources {

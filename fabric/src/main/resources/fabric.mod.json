@@ -8,7 +8,7 @@
     "Grider",
     "AxalotL",
     "FurryMileon",
-    "Cubic"
+    "Bliss_tbh"
   ],
   "contact": {
     "sources": "https://github.com/AxalotLDev/Async",
@@ -23,8 +23,7 @@
       "com.axalotl.async.Async"
     ],
     "mixinsquared": [
-      "com.axalotl.async.mixin.c2me.C2MEWTMixinCanceller",
-      "com.axalotl.async.mixin.c2me.C2MEGTMixinCanceller"
+      "com.axalotl.async.mixin.c2me.AsyncModMixinCanceller"
     ]
   },
   "accessWidener": "async.accesswidener",
@@ -47,6 +46,7 @@
   "suggests": {
   },
   "breaks": {
-    "moonrise": "*"
+    "moonrise": "*",
+    "cupboard": "*"
   }
 }

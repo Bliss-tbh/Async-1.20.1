@@ -1,8 +1,4 @@
-package com.axalotl.async.parallelised;//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
+package com.axalotl.async.parallelised;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -18,8 +13,6 @@ import java.util.stream.Collectors;
  * Provides convenient methods to create concurrent collections with standard interfaces.
  */
 public class ConcurrentCollections {
-    public ConcurrentCollections() {
-    }
 
     /**
      * Creates a new thread-safe set
@@ -48,7 +41,7 @@ public class ConcurrentCollections {
      * @param <T> the type of elements in the list
      * @return a collector that accumulates elements into a CopyOnWriteArrayList
      */
-    public static <T> Collector<T, ?, List<T>> toList() {
+    public static <T> java.util.stream.Collector<T, ?, List<T>> toList() {
         return Collectors.toCollection(CopyOnWriteArrayList::new);
     }
 }
