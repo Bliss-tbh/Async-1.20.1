@@ -1,76 +1,46 @@
 plugins {
-    id 'fabric-loom' version '1.11-SNAPSHOT'
-    id 'maven-publish'
+    id 'multiloader-loader'
+    id 'fabric-loom'
 }
-
-version = project.mod_version
-group = project.maven_group
-
-base {
-    archivesName = project.archives_base_name
-}
-
-repositories {
-    maven { url = "https://maven.shedaniel.me/" }
-    maven { url = "https://maven.terraformersmc.com/releases/" }
-    maven { url = "https://jitpack.io" }
-    maven { url = "https://maven.bawnorton.com/releases" }
-    mavenCentral()
-    mavenLocal()
-}
-
 dependencies {
-    // Minecraft
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
+    }
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    // Utils
-    compileOnly 'org.projectlombok:lombok:1.18.32'
-    annotationProcessor 'org.projectlombok:lombok:1.18.32'
-    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0")))
+    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:${mixinsquared_version}")))
+
     modImplementation 'com.electronwill.night-config:toml:3.8.1'
     include group: 'com.electronwill.night-config', name: 'toml', version: '3.8.1'
     include group: 'com.electronwill.night-config', name: 'core', version: '3.8.1'
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
-}
-
-java {
-    withSourcesJar()
-
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/async.accesswidener")
-}
-
-tasks.register("prepareKotlinBuildScriptModel"){}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+    def aw = project(':common').file("src/main/resources/async.accesswidener")
+    accessWidenerPath.set(project(":common").file("src/main/resources/async.accesswidener"))
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
     }
-}
-
-publishing {
-    publications {
-        create("mavenJava", MavenPublication) {
-            artifactId = project.archives_base_name
-            from components.java
+    mixin {
+        defaultRefmapName.set("async.refmap.json")
+    }
+    runs {
+        client {
+            client()
+            setConfigName('Fabric Client')
+            ideConfigGenerated(true)
+            runDir('runs/client')
+        }
+        server {
+            server()
+            setConfigName('Fabric Server')
+            ideConfigGenerated(true)
+            runDir('runs/server')
         }
     }
 }

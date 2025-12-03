@@ -1,0 +1,50 @@
+plugins {
+    id 'net.minecraftforge.gradle'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+}
+
+minecraft {
+    mappings channel: 'parchment', version: "${parchment_version}-${parchment_minecraft}"
+
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformer = at
+    }
+}
+
+repositories {
+    maven { url = 'https://maven.bawnorton.com/releases' }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:' + minecraft_version + '-' + forge_version // Minecraft
+
+    implementation("io.github.llamalad7:mixinextras-common:${mixinextras_version}")
+    annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}")
+    compileOnly("org.spongepowered:mixin:${mixin_version}")
+    implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:${mixinsquared_version}"))
+    implementation("org.ow2.asm:asm:9.5")
+    implementation("org.ow2.asm:asm-tree:9.5")
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+}
+
+configurations {
+    commonJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    commonResources {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+}
+
+artifacts {
+    commonJava sourceSets.main.java.sourceDirectories.singleFile
+    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}

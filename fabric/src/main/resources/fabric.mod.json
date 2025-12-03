@@ -2,48 +2,37 @@
   "schemaVersion": 1,
   "id": "async",
   "version": "${version}",
-  "name": "Async",
-  "description": "Async - Minecraft Entity Multi-Threading Mod, Now for 1.20.1!",
+  "name": "${mod_name}",
+  "description": "${description}",
   "authors": [
-    "Grider",
-    "AxalotL",
-    "FurryMileon",
-    "Bliss_tbh"
+    "${mod_authors}"
   ],
   "contact": {
-    "sources": "https://github.com/AxalotLDev/Async",
-    "issues": "https://github.com/AxalotLDev/Async/issues",
-    "homepage": "https://modrinth.com/mod/async"
+    "sources": "https://github.com/Bliss-tbh/Async-1.20.1",
+    "issues": "https://github.com/Bliss-tbh/Async-1.20.1/issues",
+    "homepage": "https://github.com/Bliss-tbh/Async-1.20.1/releases"
   },
-  "license": "GPLv3",
-  "icon": "assets/async/icon.png",
+  "license": "${license}",
+  "icon": "async/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.axalotl.async.Async"
+      "com.axalotl.async.fabric.AsyncFabric"
     ],
     "mixinsquared": [
-      "com.axalotl.async.mixin.c2me.AsyncModMixinCanceller"
+      "com.axalotl.async.common.mixin.c2me.AsyncModMixinCanceller"
     ]
   },
-  "accessWidener": "async.accesswidener",
   "mixins": [
-    "async.mixins.json"
+    "async.common.mixins.json",
+    "async.fabric.mixins.json"
   ],
+  "accessWidener": "async.accesswidener",
   "depends": {
     "fabricloader": "*",
     "fabric": "*",
     "minecraft": "1.20.1",
     "java": ">=17"
-  },
-  "custom": {
-    "lithium:options": {
-      "entity.inactive_navigations": false,
-      "experimental.entity.item_entity_merging": false,
-      "entity.collisions.unpushable_cramming": false
-    }
-  },
-  "suggests": {
   },
   "breaks": {
     "moonrise": "*",

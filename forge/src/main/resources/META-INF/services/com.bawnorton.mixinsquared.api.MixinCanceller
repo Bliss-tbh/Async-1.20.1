@@ -1,2 +1,1 @@
-com.axalotl.async.mixin.c2me.C2MEGTMixinCanceller
-com.axalotl.async.mixin.c2me.C2MEWTMixinCanceller
+com.axalotl.async.common.mixin.c2me.AsyncModMixinCanceller

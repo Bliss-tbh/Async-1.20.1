@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.axalotl.async.forge.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "server.ServerWatchdogMixin",
+    "utils.ClassInstanceMultiMapMixin",
+    "utils.UtilMixin"
+  ],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "plugin": "com.axalotl.async.forge.mixin.utils.SynchronisePlugin"
+}
