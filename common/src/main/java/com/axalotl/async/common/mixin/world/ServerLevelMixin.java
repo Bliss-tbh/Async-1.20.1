@@ -1,9 +1,8 @@
 package com.axalotl.async.common.mixin.world;
 
+import com.axalotl.async.common.ExplosionProcessor;
 import com.axalotl.async.common.ParallelProcessor;
 import com.axalotl.async.common.parallelised.ConcurrentCollections;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -12,7 +11,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.*;
@@ -20,7 +18,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTickList;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -168,29 +165,5 @@ public abstract class ServerLevelMixin extends Level implements WorldGenLevel {
 
     @Redirect(method = "sendBlockUpdated", at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerLevel;isUpdatingNavigations:Z", opcode = Opcodes.PUTFIELD))
     private void skipSendBlockUpdatedCheck(ServerLevel instance, boolean value) {
-    }
-
-    @WrapMethod(method = "explode")
-    private Explosion createExplosion(
-            @Nullable Entity source,
-            @Nullable DamageSource damageSource,
-            @Nullable ExplosionDamageCalculator damageCalculator,
-            double x, double y, double z,
-            float radius,
-            boolean fire,
-            ExplosionInteraction explosionInteraction,
-            Operation<Explosion> original
-    ) {
-        synchronized (lock) {
-            return original.call(
-                    source,
-                    damageSource,
-                    damageCalculator,
-                    x, y, z,
-                    radius,
-                    fire,
-                    explosionInteraction
-            );
-        }
     }
 }

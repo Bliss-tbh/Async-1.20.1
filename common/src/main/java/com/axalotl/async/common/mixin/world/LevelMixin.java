@@ -1,28 +1,27 @@
 package com.axalotl.async.common.mixin.world;
 
+import com.axalotl.async.common.ExplosionProcessor;
+import com.axalotl.async.common.ParallelProcessor;
+import com.axalotl.async.common.config.AsyncConfig;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-
-import java.util.concurrent.locks.ReentrantLock;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = Level.class, priority = 1500)
 public abstract class LevelMixin implements LevelAccessor, AutoCloseable {
-
-    @Unique
-    private static final Object async$lock = new Object();
 
     @Shadow
     @Final
@@ -33,24 +32,12 @@ public abstract class LevelMixin implements LevelAccessor, AutoCloseable {
         return this.thread;
     }
 
-    @WrapMethod(method = "explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;")
-    private Explosion createExplosion(Entity entity, double x, double y, double z, float power, Level.ExplosionInteraction explosionSourceType, Operation<Explosion> original) {
-        synchronized (async$lock) {
-            return original.call(entity, x, y, z, power, explosionSourceType);
-        }
-    }
-
-    @WrapMethod(method = "explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;")
-    private Explosion createExplosion(Entity entity, DamageSource damageSource, ExplosionDamageCalculator behavior, double x, double y, double z, float power, boolean createFire, Level.ExplosionInteraction explosionSourceType, Operation<Explosion> original) {
-        synchronized (async$lock) {
-            return original.call(entity, damageSource, behavior, x, y, z, power, createFire, explosionSourceType);
-        }
-    }
-
-    @WrapMethod(method = "explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;")
-    private Explosion createExplosion(Entity entity, double x, double y, double z, float power, boolean createFire, Level.ExplosionInteraction explosionSourceType, Operation<Explosion> original) {
-        synchronized (async$lock) {
-            return original.call(entity, x, y, z, power, createFire, explosionSourceType);
+    @Redirect(method = "explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;Z)Lnet/minecraft/world/level/Explosion;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Explosion;explode()V"))
+    private void onExplode(Explosion explosion, @Local(ordinal = 0) boolean pSpawnParticles) {
+        if (!AsyncConfig.synchronizedEntities.getValue().contains(ResourceLocation.tryBuild("minecraft", "tnt"))) {
+            ExplosionProcessor.queueExplosion(explosion, pSpawnParticles);
+        } else {
+            explosion.explode();
         }
     }
 }

@@ -1,54 +1,127 @@
 package com.axalotl.async.common.config;
 
+import com.axalotl.async.common.parallelised.utils.ModCompatibility;
+import com.axalotl.async.common.platform.PlatformUtils;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import com.axalotl.async.common.platform.PlatformEvents;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class AsyncConfig {
     public static final Logger LOGGER = LoggerFactory.getLogger("Async Config");
 
     public static Map.Entry<String, Boolean> disabled = new AbstractMap.SimpleEntry<>("disabled", false);
-    public static Map.Entry<String, Integer> paraMax = new AbstractMap.SimpleEntry<>("paraMax", -1);
+    public static Map.Entry<String, Integer> maxThreads = new AbstractMap.SimpleEntry<>("paraMax", -1);
     public static Map.Entry<String, Boolean> enableAsyncSpawn = new AbstractMap.SimpleEntry<>("enableAsyncSpawn", true);
     public static Map.Entry<String, Boolean> enableAsyncRandomTicks = new AbstractMap.SimpleEntry<>("enableAsyncRandomTicks", false);
+    public static Map.Entry<String, Set<String>> synchronizedEntities = new AbstractMap.SimpleEntry<>("synchronizedEntities", getDefaultSynchronizedEntities());
 
-    public static Map.Entry<String, Set<ResourceLocation>> synchronizedEntities = new AbstractMap.SimpleEntry<>("synchronizedEntities", getDefaultSynchronizedEntities());
+    // Caches
+    private static final Map<ResourceLocation, Boolean> syncCache = new ConcurrentHashMap<>();
+    private static final Set<String> exactEntities = new HashSet<>();
+    private static final Set<String> namespaceWildcards = new HashSet<>();
 
-    public static Set<ResourceLocation> getDefaultSynchronizedEntities() {
-        return Set.of(
-                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "tnt")),
-                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "item")),
-                Objects.requireNonNull(ResourceLocation.tryBuild("minecraft", "experience_orb"))
-        );
+
+    public static Set<String> getDefaultSynchronizedEntities() {
+        final Set<String> defaultSynchronizedEntities = new HashSet<>(ModCompatibility.addUnsupportedMods());
+        defaultSynchronizedEntities.addAll(Set.of(
+                "minecraft:tnt",
+                "minecraft:item",
+                "minecraft:experience_orb"
+        ));
+        return defaultSynchronizedEntities;
     }
+
 
     public static int getParallelism() {
-        if (paraMax.getValue() <= 0) return Runtime.getRuntime().availableProcessors();
-        return Math.max(1, Math.min(Runtime.getRuntime().availableProcessors(), paraMax.getValue()));
+        if (maxThreads.getValue() <= 0) return Runtime.getRuntime().availableProcessors();
+        return Math.max(1, Math.min(Runtime.getRuntime().availableProcessors(), maxThreads.getValue()));
     }
 
-    public static void syncEntity(ResourceLocation entityId) {
-        if (synchronizedEntities.getValue().add(entityId)) {
-            PlatformEvents.getInstance().saveConfig();
-            LOGGER.info("Sync entity class: {}", entityId);
+    public static boolean isNamespaceWildcard(String input) {
+        if (input == null) return false;
+        int colon = input.indexOf(':');
+        if (colon <= 0) return false;
+        return input.substring(colon + 1).equals("*");
+    }
+
+    public static boolean existsNamespace(String namespace) {
+        for (ResourceLocation id : BuiltInRegistries.ENTITY_TYPE.keySet()) {
+            if (id.getNamespace().equals(namespace)) return true;
+        }
+        return false;
+    }
+
+    public static boolean matchesExistingNamespaceWildcard(String input) {
+        if (!isNamespaceWildcard(input)) return false;
+        String ns = input.substring(0, input.indexOf(':'));
+        return existsNamespace(ns);
+    }
+
+    public static void syncEntity(String entity) {
+        if (synchronizedEntities.getValue().add(entity)) {
+            rebuildCaches();
+            PlatformUtils.saveConfig();
+            LOGGER.info("Added sync entity: {}", entity);
         } else {
-            LOGGER.warn("Entity class already synchronized: {}", entityId);
+            LOGGER.warn("Entity already synchronized: {}", entity);
         }
     }
-    public static void asyncEntity(ResourceLocation entityId) {
-        if (synchronizedEntities.getValue().remove(entityId)) {
-            PlatformEvents.getInstance().saveConfig();
-            LOGGER.info("Enable async process entity class: {}", entityId);
+
+    public static void removeEntity(String entity) {
+        if (synchronizedEntities.getValue().remove(entity)) {
+            rebuildCaches();
+            PlatformUtils.saveConfig();
+            LOGGER.info("Removed sync entity: {}", entity);
         } else {
-            LOGGER.warn("Entity class not found: {}", entityId);
+            LOGGER.warn("Entity not found: {}", entity);
         }
+    }
+
+    private static void rebuildCaches() {
+        syncCache.clear();
+        exactEntities.clear();
+        namespaceWildcards.clear();
+
+        for (String entry : synchronizedEntities.getValue()) {
+            if (isNamespaceWildcard(entry)) {
+                String ns = entry.substring(0, entry.indexOf(':'));
+                namespaceWildcards.add(ns);
+            } else {
+                exactEntities.add(entry);
+            }
+        }
+    }
+
+    public static boolean isEntitySynchronized(ResourceLocation entityId) {
+        Boolean cached = syncCache.get(entityId);
+        if (cached != null) return cached;
+
+        String idString = entityId.toString();
+        if (exactEntities.contains(idString)) {
+            syncCache.put(entityId, true);
+            return true;
+        }
+
+        if (namespaceWildcards.contains(entityId.getNamespace())) {
+            syncCache.put(entityId, true);
+            return true;
+        }
+
+        syncCache.put(entityId, false);
+        return false;
+    }
+
+    public static void onConfigLoaded() {
+        rebuildCaches();
+        LOGGER.info("Configuration loaded.");
+    }
+
+    public static void clearCaches() {
+        syncCache.clear();
     }
 }

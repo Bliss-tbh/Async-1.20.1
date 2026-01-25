@@ -1,4 +1,4 @@
-package com.axalotl.async.common.mixin.entity;
+package com.axalotl.async.common.mixin.entity.breed;
 
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.animal.Animal;
@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Turtle.TurtleBreedGoal.class)
 public abstract class TurtleMixin extends BreedGoal {
+
     @Shadow
     @Final
     private Turtle turtle;

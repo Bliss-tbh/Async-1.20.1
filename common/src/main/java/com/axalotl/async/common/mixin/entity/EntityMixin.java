@@ -1,42 +1,31 @@
 package com.axalotl.async.common.mixin.entity;
 
-import com.google.common.collect.ImmutableList;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Stream;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
 
     @Shadow
-    volatile private ImmutableList<Entity> passengers = ImmutableList.of();
+    public abstract Level level();
+
+    @Shadow
+    public abstract BlockPos blockPosition();
+
     @Unique
-    private static final ReentrantLock async$lock = new ReentrantLock();
-
-    @WrapMethod(method = "spawnAtLocation(Lnet/minecraft/world/level/ItemLike;I)Lnet/minecraft/world/entity/item/ItemEntity;")
-    private ItemEntity spawnAtLocation(ItemLike item, int yOffset, Operation<ItemEntity> original) {
-        synchronized (async$lock) {
-            return original.call(item, yOffset);
-        }
-    }
-
-    @WrapMethod(method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;")
-    private ItemEntity spawnAtLocation(ItemStack stack, float yOffset, Operation<ItemEntity> original) {
-        synchronized (async$lock) {
-            return original.call(stack, yOffset);
-        }
-    }
+    private static final Object async$lock = new Object();
 
     @WrapMethod(method = "setRemoved")
     private void setRemoved(Entity.RemovalReason reason, Operation<Void> original) {
@@ -46,14 +35,32 @@ public abstract class EntityMixin {
     }
 
     @WrapMethod(method = "getFeetBlockState")
-    private BlockState getFeetBlockState(Operation<BlockState> original) {
+    private BlockState wrapFeetBlockState(Operation<BlockState> original) {
         BlockState blockState = original.call();
-        if (blockState != null) {
-            return blockState;
-        } else {
+
+        if (blockState == null && this.level() instanceof ServerLevel serverLevel) {
+            BlockPos pos = this.blockPosition();
+
+            LevelChunk chunk = serverLevel.getChunkSource()
+                    .getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+
+            if (chunk != null) {
+                return chunk.getBlockState(pos);
+            }
+
+            ChunkAccess access = serverLevel.getChunkSource()
+                    .getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, true);
+
+            if (access instanceof LevelChunk levelChunk) {
+                return levelChunk.getBlockState(pos);
+            }
+
             return Blocks.AIR.defaultBlockState();
         }
+
+        return blockState;
     }
+
 
     @WrapMethod(method = "addPassenger")
     private void addPassenger(Entity passenger, Operation<Void> original) {
@@ -62,17 +69,17 @@ public abstract class EntityMixin {
         }
     }
 
-    @WrapMethod(method = "getIndirectPassengersStream")
-    private Stream<Entity> getIndirectPassengersStream(Operation<Stream<Entity>> original) {
-        synchronized (async$lock) {
-            return original.call();
-        }
-    }
-
     @WrapMethod(method = "removePassenger")
     private void removePassenger(Entity passenger, Operation<Void> original) {
         synchronized (async$lock) {
             original.call(passenger);
+        }
+    }
+
+    @WrapMethod(method = "ejectPassengers")
+    private void ejectPassengers(Operation<Void> original) {
+        synchronized (async$lock) {
+            original.call();
         }
     }
 }

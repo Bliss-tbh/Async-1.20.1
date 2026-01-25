@@ -15,17 +15,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(Animal.class)
 public abstract class AnimalMixin extends Entity {
+
     @Unique
     private final AtomicBoolean async$breedingFlag = new AtomicBoolean(false);
     @Unique
     private final AtomicBoolean async$breedingBabyFlag = new AtomicBoolean(false);
 
-    public AnimalMixin(EntityType<?> type, Level world) {
-        super(type, world);
+    public AnimalMixin(EntityType<?> entityType, Level level) {
+        super(entityType, level);
     }
 
-    @WrapMethod(method = "spawnChildFromBreeding(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/animal/Animal;)V")
-    private void spawnChildFromBreeding(ServerLevel world, Animal other, Operation<Void> original) {
+    @WrapMethod(method = "spawnChildFromBreeding")
+    private void breed(ServerLevel world, Animal other, Operation<Void> original) {
         if (this.getId() > other.getId()) return;
         AnimalMixin otherMixin = (AnimalMixin) (Object) other;
         if (this.async$breedingFlag.compareAndSet(false, true) && otherMixin.async$breedingFlag.compareAndSet(false, true)) {
@@ -38,7 +39,7 @@ public abstract class AnimalMixin extends Entity {
         }
     }
 
-    @WrapMethod(method = "finalizeSpawnChildFromBreeding(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/animal/Animal;Lnet/minecraft/world/entity/AgeableMob;)V")
+    @WrapMethod(method = "finalizeSpawnChildFromBreeding")
     private void breed(ServerLevel world, Animal other, AgeableMob baby, Operation<Void> original) {
         if (this.getId() > other.getId()) return;
         AnimalMixin otherMixin = (AnimalMixin) (Object) other;

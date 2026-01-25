@@ -17,19 +17,20 @@ import java.util.Map;
 public class ServerWatchdogMixin {
 
     @Inject(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/CrashReport;addCategory(Ljava/lang/String;)Lnet/minecraft/CrashReportCategory;"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void addCustomCrashReport(CallbackInfo ci, long i, long j, long k, ThreadMXBean threadmxbean, ThreadInfo[] athreadinfo, StringBuilder stringbuilder, Error error, CrashReport crashreport){
+    private void addCustomCrashReport(CallbackInfo ci, long l, long m, long n, ThreadMXBean threadmxbean, ThreadInfo[] athreadInfo, StringBuilder stringbuilder, Error error, CrashReport crashreport){
         CrashReportCategory threadDumpSection = crashreport.addCategory("Async thread dump");
         threadDumpSection.setDetail("All Threads", () -> {
+            StringBuilder sb = new StringBuilder();
             Map<Thread, StackTraceElement[]> allThreads = Thread.getAllStackTraces();
             for (Map.Entry<Thread, StackTraceElement[]> entry : allThreads.entrySet()) {
                 Thread t = entry.getKey();
-                stringbuilder.append(String.format("\"%s\" [%s]%n", t.getName(), t.getState()));
+                sb.append(String.format("\"%s\" [%s]%n", t.getName(), t.getState()));
                 for (StackTraceElement ste : entry.getValue()) {
-                    stringbuilder.append("\tat ").append(ste).append("\n");
+                    sb.append("\tat ").append(ste).append("\n");
                 }
-                stringbuilder.append("\n");
+                sb.append("\n");
             }
-            return stringbuilder.toString();
+            return sb.toString();
         });
     }
 

@@ -12,10 +12,15 @@ import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(EntityTickList.class)
 public class EntityTickListMixin {
-    @Unique
-    private final Object async$lock = new Object();
     @Shadow
     private Int2ObjectMap<Entity> passive = new Int2ObjectConcurrentHashMap<>();
+    @Shadow
+    private Int2ObjectMap<Entity> active;
+    @Shadow
+    private Int2ObjectMap<Entity> iterated;
+
+    @Unique
+    private final Object async$lock = new Object();
 
     @WrapMethod(method = "add")
     private void add(Entity entity, Operation<Void> original) {

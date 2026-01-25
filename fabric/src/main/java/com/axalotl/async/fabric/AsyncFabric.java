@@ -1,12 +1,12 @@
 package com.axalotl.async.fabric;
 
+import com.axalotl.async.common.ExplosionProcessor;
 import com.axalotl.async.common.ParallelProcessor;
 import com.axalotl.async.common.commands.AsyncCommand;
 import com.axalotl.async.common.commands.StatsCommand;
 import com.axalotl.async.common.config.AsyncConfig;
 import com.axalotl.async.common.platform.PlatformInitializer;
 import com.axalotl.async.fabric.config.AsyncConfigFabric;
-import com.axalotl.async.fabric.platform.FabricPlatformEvents;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -27,6 +27,7 @@ public class AsyncFabric implements ModInitializer, PlatformInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             LOGGER.info("Async Setting up thread-pool...");
             StatsCommand.runStatsThread();
+            ExplosionProcessor.start();
             ParallelProcessor.setServer(server);
             ParallelProcessor.setupThreadPool(AsyncConfig.getParallelism(), this);
         });
@@ -35,6 +36,7 @@ public class AsyncFabric implements ModInitializer, PlatformInitializer {
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             LOGGER.info("Shutting down Async thread pool...");
+            ExplosionProcessor.stop();
             ParallelProcessor.stop();
             StatsCommand.shutdown();
         });

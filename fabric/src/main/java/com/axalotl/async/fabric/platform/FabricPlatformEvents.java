@@ -20,4 +20,9 @@ public class FabricPlatformEvents implements PlatformEvents {
     public boolean platformUsesRefmap() {
         return true;
     }
+
+    @Override
+    public boolean isFabric() {
+        return true;
+    }
 }

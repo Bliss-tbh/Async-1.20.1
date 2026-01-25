@@ -35,7 +35,7 @@ public class ParallelProcessor {
     public static AtomicInteger currentEntities = new AtomicInteger();
     private static final AtomicInteger threadPoolID = new AtomicInteger();
     public static ExecutorService tickPool;
-    private static final BlockingQueue<CompletableFuture<?>> taskQueue = new LinkedBlockingQueue<>();
+    public static final BlockingQueue<CompletableFuture<?>> taskQueue = new LinkedBlockingQueue<>();
     private static final Set<UUID> blacklistedEntity = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, Integer> portalTickSyncMap = new ConcurrentHashMap<>();
     private static final Map<String, Set<WeakReference<Thread>>> mcThreadTracker = new ConcurrentHashMap<>();
@@ -45,14 +45,14 @@ public class ParallelProcessor {
             Boat.class
     );
 
-    public static void setupThreadPool(int parallelism, PlatformInitializer asyncClass) {
+    public static void setupThreadPool(int parallelism, Class<?> asyncClass) {
         ForkJoinPool.ForkJoinWorkerThreadFactory tickThreadFactory = pool -> {
             ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             worker.setName("Async-Tick-Pool-Thread-" + threadPoolID.getAndIncrement());
             registerThread("Async-Tick", worker);
             worker.setDaemon(true);
             worker.setPriority(Thread.NORM_PRIORITY);
-            worker.setContextClassLoader(asyncClass.getClass().getClassLoader());
+            worker.setContextClassLoader(asyncClass.getClassLoader());
             return worker;
         };
 
@@ -110,7 +110,7 @@ public class ParallelProcessor {
                 entity instanceof ServerPlayer ||
                 BLOCKED_ENTITIES.contains(entity.getClass()) ||
                 blacklistedEntity.contains(entityId) ||
-                AsyncConfig.synchronizedEntities.getValue().contains(EntityType.getKey(entity.getType()));
+                AsyncConfig.isEntitySynchronized(EntityType.getKey(entity.getType()));
 
         if (requiresSyncTick) {
             return true;
@@ -141,7 +141,7 @@ public class ParallelProcessor {
         try {
             world.tickNonPassenger(entity);
         } catch (Exception e) {
-            logEntityError("Error ticking synchronously", entity, e);
+            logEntityError("Error during synchronous tick", entity, e);
         }
     }
 
@@ -159,7 +159,7 @@ public class ParallelProcessor {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
                     NaturalSpawner.spawnForChunk(level, chunk, spawnState, spawnAnimals, spawnMonsters, rareSpawn), ParallelProcessor.tickPool
             ).exceptionally(e -> {
-                ParallelProcessor.LOGGER.error("Error in async spawn tick, switching to synchronous", e);
+                ParallelProcessor.LOGGER.error("Error in async spawn spawn, switching to synchronous", e);
                 NaturalSpawner.spawnForChunk(level, chunk, spawnState, spawnAnimals, spawnMonsters, rareSpawn);
                 return null;
             });

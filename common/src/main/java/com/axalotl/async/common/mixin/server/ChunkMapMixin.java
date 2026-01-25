@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
-import net.minecraft.server.level.DistanceManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import org.spongepowered.asm.mixin.*;
@@ -54,7 +53,7 @@ public abstract class ChunkMapMixin extends ChunkStorage implements ChunkHolder.
     /*
     Synchronising "releaseGeneration"
 
-    Not Implemented
+    Not Implemented has stuff to do with addsavedependency idk
     */
 
     @Inject(method = "addEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;pauseInIde(Ljava/lang/Throwable;)Ljava/lang/Throwable;"), cancellable = true)

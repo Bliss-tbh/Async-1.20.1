@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Set;
 
 @Mixin(GoalSelector.class)
-public abstract class GoalSelectorMixin {
+public class GoalSelectorMixin {
 
     @Shadow
     final private Set<WrappedGoal> availableGoals = ConcurrentCollections.newHashSet();

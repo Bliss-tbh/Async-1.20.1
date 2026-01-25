@@ -1,34 +1,52 @@
 plugins {
+    id 'java'
+    id 'net.minecraftforge.accesstransformers'
     id 'net.minecraftforge.gradle'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'net.minecraftforge.jarjar'
 }
 
-minecraft {
-    mappings channel: 'parchment', version: "${parchment_version}-${parchment_minecraft}"
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+minecraft {
+    mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}"
+
+    // Logic for finding the Access Transformer
     def at = file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformer = at
+        setAccessTransformer('../../../../common/src/main/resources/META-INF/accesstransformer.cfg')
     }
 }
 
 repositories {
-    maven { url = 'https://maven.bawnorton.com/releases' }
+    maven { name = 'Bawnorton'; url = 'https://maven.bawnorton.com/releases' }
+
+    maven minecraft.mavenizer
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+
+    mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:' + minecraft_version + '-' + forge_version // Minecraft
+    // 1. Core Minecraft/Forge
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.10'
 
-    implementation("io.github.llamalad7:mixinextras-common:${mixinextras_version}")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}")
-    compileOnly("org.spongepowered:mixin:${mixin_version}")
+    // 2. Mixin Stack (Extras + Squared)
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
     implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:${mixinsquared_version}"))
-    implementation("org.ow2.asm:asm:9.5")
-    implementation("org.ow2.asm:asm-tree:9.5")
+
+    // 3. ASM (Required for low-level byte manipulation)
+    implementation "org.ow2.asm:asm:9.5"
+    implementation "org.ow2.asm:asm-tree:9.5"
+
+    // 4. Utilities (Lombok)
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
 }
 
+// Configuration for sharing source/resources with loader-specific projects
 configurations {
     commonJava {
         canBeResolved = false
@@ -38,10 +56,6 @@ configurations {
         canBeResolved = false
         canBeConsumed = true
     }
-}
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 
 artifacts {

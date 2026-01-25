@@ -96,7 +96,6 @@ public final class ConcurrentShortHashSet implements ShortSet {
         int size = backing.size();
         short[] result = new short[size];
         int i = 0;
-        // Используем for-each для обхода backing
         for (Short value : backing) {
             result[i++] = value;
         }

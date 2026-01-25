@@ -1,4 +1,4 @@
-package com.axalotl.async.common.mixin.entity;
+package com.axalotl.async.common.mixin.entity.breed;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -16,22 +16,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class SnifferMixin extends Animal {
 
     @Unique
-    private final AtomicBoolean breedingFlag = new AtomicBoolean(false);
+    private final AtomicBoolean async$breedingFlag = new AtomicBoolean(false);
 
     protected SnifferMixin(EntityType<? extends Animal> entityType, Level world) {
         super(entityType, world);
     }
 
-    @WrapMethod(method = "spawnChildFromBreeding(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/animal/Animal;)V")
+    @WrapMethod(method = "spawnChildFromBreeding")
     private void breed(ServerLevel world, Animal other, Operation<Void> original) {
         if (this.getId() > other.getId()) return;
         SnifferMixin otherMixin = (SnifferMixin) other;
-        if (this.breedingFlag.compareAndSet(false, true) && otherMixin.breedingFlag.compareAndSet(false, true)) {
+        if (this.async$breedingFlag.compareAndSet(false, true) && otherMixin.async$breedingFlag.compareAndSet(false, true)) {
             try {
                 original.call(world, other);
             } finally {
-                this.breedingFlag.set(false);
-                otherMixin.breedingFlag.set(false);
+                this.async$breedingFlag.set(false);
+                otherMixin.async$breedingFlag.set(false);
             }
         }
     }

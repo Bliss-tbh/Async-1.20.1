@@ -15,7 +15,7 @@ import java.util.concurrent.ForkJoinWorkerThread;
 public abstract class UtilMixin {
 
     @Inject(method = "lambda$makeExecutor$3", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/ForkJoinWorkerThread;setName(Ljava/lang/String;)V"))
-    private static void registerThread(String serviceName, ForkJoinPool forkJoinPool, CallbackInfoReturnable<ForkJoinWorkerThread> cir, @Local ForkJoinWorkerThread forkJoinWorkerThread) {
-        ParallelProcessor.registerThread(serviceName, forkJoinWorkerThread);
+    private static void registerThread(String p_201862_, ForkJoinPool p_201863_, CallbackInfoReturnable<ForkJoinWorkerThread> cir, @Local ForkJoinWorkerThread forkJoinWorkerThread) {
+        ParallelProcessor.registerThread(p_201862_, forkJoinWorkerThread);
     }
 }

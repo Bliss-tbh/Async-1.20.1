@@ -1,4 +1,4 @@
-package com.axalotl.async.common.mixin.entity;
+package com.axalotl.async.common.mixin.entity.breed;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(Frog.class)
 public abstract class FrogMixin extends Animal {
+
     @Unique
     private final AtomicBoolean async$breedingFlag = new AtomicBoolean(false);
 
@@ -21,7 +22,7 @@ public abstract class FrogMixin extends Animal {
         super(entityType, world);
     }
 
-    @WrapMethod(method = "spawnChildFromBreeding(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/animal/Animal;)V")
+    @WrapMethod(method = "spawnChildFromBreeding")
     private void breed(ServerLevel world, Animal other, Operation<Void> original) {
         if (this.getId() > other.getId()) return;
         FrogMixin otherMixin = (FrogMixin) other;

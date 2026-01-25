@@ -18,7 +18,8 @@ import java.util.function.ToDoubleFunction;
 @Mixin(value = NearestItemSensor.class, priority = 1500)
 public class NearestItemSensorMixin {
 
-    @Redirect(method = "doTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;)V", at = @At(value = "INVOKE", target = "Ljava/util/Comparator;comparingDouble(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;"))
+    @Redirect(method = "doTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;)V",
+            at = @At(value = "INVOKE", target = "Ljava/util/Comparator;comparingDouble(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;"))
     private Comparator<ItemEntity> doTick(ToDoubleFunction<? super ItemEntity> keyExtractor, ServerLevel world, Mob entity) {
         Map<ItemEntity, Vec3> positionCache = new HashMap<>();
         return (item1, item2) -> {

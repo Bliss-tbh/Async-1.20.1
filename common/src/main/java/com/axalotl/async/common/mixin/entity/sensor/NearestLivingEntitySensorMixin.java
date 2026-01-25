@@ -17,7 +17,8 @@ import java.util.function.ToDoubleFunction;
 @Mixin(value = NearestLivingEntitySensor.class, priority = 1500)
 public class NearestLivingEntitySensorMixin {
 
-    @Redirect(method = "doTick", at = @At(value = "INVOKE", target = "Ljava/util/Comparator;comparingDouble(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;"))
+    @Redirect(method = "doTick",
+            at = @At(value = "INVOKE", target = "Ljava/util/Comparator;comparingDouble(Ljava/util/function/ToDoubleFunction;)Ljava/util/Comparator;"))
     private Comparator<LivingEntity> doTick(ToDoubleFunction<? super LivingEntity> keyExtractor, ServerLevel world, LivingEntity entity) {
         Map<LivingEntity, Vec3> positionCache = new HashMap<>();
         return (entity1, entity2) -> {

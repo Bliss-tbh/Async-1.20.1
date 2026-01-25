@@ -4,16 +4,15 @@ import com.axalotl.async.common.ParallelProcessor;
 import com.axalotl.async.common.config.AsyncConfig;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.util.Either;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
-import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.*;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -35,16 +34,23 @@ public abstract class ServerChunkCacheMixin extends ChunkSource {
 
     @Shadow
     @Final
-    public ChunkMap chunkMap;
-
-    @Shadow
-    @Final
     Thread mainThread;
 
     @Shadow
     public abstract @Nullable ChunkHolder getVisibleChunkIfPresent(long pos);
 
+    @Unique
     private final List<LevelChunk> async$chunksToTick = new ArrayList<>();
+
+//    ChunkDebugHookTerminatorExperiments TeeHee
+//    @Inject(method = "getChunk(IILnet/minecraft/world/level/chunk/ChunkStatus;Z)Lnet/minecraft/world/level/chunk/ChunkAccess;",
+//            at = @At(
+//                    value = "INVOKE",
+//                    target = "Lnet/minecraft/server/level/ServerChunkCache$MainThreadExecutor;managedBlock(Ljava/util/function/BooleanSupplier;)V"
+//            ))
+//    private void robustShortcutGetChunk(int x, int z, ChunkStatus leastStatus, boolean create, CallbackInfoReturnable<ChunkAccess> cir, @Local long chunkPos, @Local CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> i) {
+//        DebugHookTerminator.chunkLoadDrive(this.mainThreadProcessor, i::isDone, (ServerChunkCache) (Object) this, i, chunkPos);
+//    }
 
     @Inject(method = "getChunk(IILnet/minecraft/world/level/chunk/ChunkStatus;Z)Lnet/minecraft/world/level/chunk/ChunkAccess;",
             at = @At("HEAD"), cancellable = true)
@@ -97,12 +103,12 @@ public abstract class ServerChunkCacheMixin extends ChunkSource {
     }
 
     @Inject(method = "tickChunks", at = @At("TAIL"))
-    private void processCollectedChunks(CallbackInfo ci, @Local(ordinal = 0) int randomTickSpeed) {
+    private void processCollectedChunks(CallbackInfo ci) {
         if (!AsyncConfig.disabled.getValue() && AsyncConfig.enableAsyncRandomTicks.getValue() && !this.async$chunksToTick.isEmpty()) {
             final List<LevelChunk> chunksToProcess = new ArrayList<>(this.async$chunksToTick);
             CompletableFuture.runAsync(() -> {
                 for (LevelChunk chunk : chunksToProcess) {
-                    this.level.tickChunk(chunk, randomTickSpeed);
+                        this.level.tickChunk(chunk, this.level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING));
                 }
             }, ParallelProcessor.tickPool).exceptionally(e -> {
                 ParallelProcessor.LOGGER.error("Error in async random tick, switching to synchronous", e);

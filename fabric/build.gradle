@@ -1,34 +1,25 @@
 plugins {
     id 'multiloader-loader'
     id 'fabric-loom'
+    id 'java-library'
+    id 'idea'
 }
-dependencies {
-    minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.layered {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
-    }
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:${mixinsquared_version}")))
-
-    modImplementation 'com.electronwill.night-config:toml:3.8.1'
-    include group: 'com.electronwill.night-config', name: 'toml', version: '3.8.1'
-    include group: 'com.electronwill.night-config', name: 'core', version: '3.8.1'
-    compileOnly 'org.projectlombok:lombok:1.18.32'
-    annotationProcessor 'org.projectlombok:lombok:1.18.32'
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 loom {
+    // 1. Access Widener & Mixin Config
     def aw = project(':common').file("src/main/resources/async.accesswidener")
-    accessWidenerPath.set(project(":common").file("src/main/resources/async.accesswidener"))
     if (aw.exists()) {
-        accessWidenerPath.set(aw)
+        accessWidenerPath = aw
     }
+
     mixin {
-        defaultRefmapName.set("async.refmap.json")
+        defaultRefmapName = "async.refmap.json"
+        useLegacyMixinAp = true
     }
+
+    // 2. Run Configurations
     runs {
         client {
             client()
@@ -43,4 +34,40 @@ loom {
             runDir('runs/server')
         }
     }
+}
+
+repositories {
+    maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' }
+    maven { name = 'Bawnorton'; url = 'https://maven.bawnorton.com/releases' }
+    mavenCentral()
+}
+
+dependencies {
+    // 1. Core Minecraft & Mappings
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
+    }
+
+    // 2. Loader & API
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+
+    // 3. Mixin Stack & Dependencies
+    // MixinSquared
+    include(implementation(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-fabric:${mixinsquared_version}")))
+
+    // NightConfig (Used for TOML support on Fabric)
+    include(modImplementation('com.electronwill.night-config:toml:3.8.1'))
+    include('com.electronwill.night-config:core:3.8.1')
+
+    // Permissions API
+    modImplementation(include("me.lucko:fabric-permissions-api:${permission_api}")) {
+        exclude group: "net.fabricmc.fabric-api"
+    }
+
+    // 4. Utilities (Lombok)
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
 }

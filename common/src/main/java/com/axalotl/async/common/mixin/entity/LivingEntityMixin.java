@@ -2,7 +2,11 @@ package com.axalotl.async.common.mixin.entity;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.block.state.BlockState;
@@ -14,29 +18,22 @@ import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Mixin(value = LivingEntity.class, priority = 1001)
 public abstract class LivingEntityMixin extends Entity {
-    @Mutable
+
     @Shadow
-    @Final
-    private Map<Holder<MobEffect>, MobEffectInstance> activeEffects;
+    final private Map<Holder<MobEffect>, MobEffectInstance> activeEffects = new ConcurrentHashMap<>();
+
     @Unique
-    private static final ReentrantLock async$lock = new ReentrantLock();
+    private static final Object async$lock = new Object();
 
     public LivingEntityMixin(EntityType<?> type, Level world) {
         super(type, world);
-    }
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void init(EntityType<?> entityType, Level level, CallbackInfo ci) {
-        this.activeEffects = new ConcurrentHashMap<>();
     }
 
     @WrapMethod(method = "die")
@@ -44,24 +41,41 @@ public abstract class LivingEntityMixin extends Entity {
         original.call(damageSource);
     }
 
-    @WrapMethod(method = "dropFromLootTable")
-    private synchronized void dropFromLootTable(DamageSource damageSource, boolean causedByPlayer, Operation<Void> original) {
-        original.call(damageSource, causedByPlayer);
+    @WrapMethod(method = "dropFromLootTable(Lnet/minecraft/world/damagesource/DamageSource;Z)V")
+    private synchronized void dropFromLootTable(DamageSource damageSource, boolean playerKill, Operation<Void> original) {
+        original.call(damageSource, playerKill);
     }
 
-    @WrapMethod(method = "blockedByShield")
-    private void blockedByShield(LivingEntity target, Operation<Void> original) {
+    @WrapMethod(method = "knockback")
+    private synchronized void knockback(double strength, double x, double z, Operation<Void> original) {
         synchronized (async$lock) {
-            original.call(target);
+            original.call(strength, x, z);
         }
     }
 
     @WrapMethod(method = "tickEffects")
-    private void tickEffects(Operation<Void> original) {
+    private void tickStatusEffects(Operation<Void> original) {
         synchronized (async$lock) {
             original.call();
         }
     }
+
+    @WrapOperation(
+            method = "tickEffects",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/effect/MobEffectInstance;tick(Lnet/minecraft/world/entity/LivingEntity;Ljava/lang/Runnable;)Z"
+            )
+    )
+    private boolean wrapTickEffect(MobEffectInstance instance, LivingEntity livingEntity, Runnable pEntity, Operation<Boolean> original) {
+        if (instance != null) {
+            return original.call(instance, livingEntity, pEntity);
+        } else {
+            return false;
+        }
+    }
+
+    //lists not used on 1.20.1
 
     @WrapMethod(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z")
     private boolean addEffect(MobEffectInstance effect, Entity source, Operation<Boolean> original) {
@@ -70,9 +84,27 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
-    private void onClimbable(CallbackInfoReturnable<Boolean> cir) {
-        BlockState blockState = this.getFeetBlockState();
-        if (blockState == null) cir.setReturnValue(false);
+    @WrapMethod(method = "removeEffect")
+    private boolean removeEffect(MobEffect effect, Operation<Boolean> original) {
+        synchronized (async$lock) {
+            return original.call(effect);
+        }
+    }
+
+    @WrapMethod(method = "removeAllEffects")
+    private boolean removeAllEffects(Operation<Boolean> original) {
+        synchronized (async$lock) {
+            return original.call();
+        }
+    }
+
+    @Inject(method = "causeFallDamage", at = @At("HEAD"), cancellable = true)
+    private void causeFallDamage(float fallDistance, float multiplier, DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+        BlockPos pos = new BlockPos(Mth.floor(this.getX()), Mth.floor(this.getY()), Mth.floor(this.getZ()));
+        BlockState currentBlock = this.level().getBlockState(pos);
+
+        if (currentBlock.is(BlockTags.CLIMBABLE)) {
+            cir.setReturnValue(false);
+        }
     }
 }

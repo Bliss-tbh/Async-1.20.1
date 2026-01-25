@@ -1,48 +1,81 @@
 plugins {
     id 'multiloader-loader'
+    id 'net.minecraftforge.accesstransformers'
     id 'net.minecraftforge.gradle'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'net.minecraftforge.jarjar'
+    id 'java-library'
+    id 'idea'
 }
 
-minecraft {
-    mappings channel: 'parchment', version: "${parchment_version}-${parchment_minecraft}"
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+minecraft {
+    mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}"
+
+    // Use the common access transformer if it exists
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformer = at.absolutePath
+        setAccessTransformer('../../../../common/src/main/resources/META-INF/accesstransformer.cfg')
     }
 
     runs {
         configureEach {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', mod_id
-            taskName = "Forge${name.capitalize()}${project.name.capitalize()}"
+            workingDir.convention layout.projectDirectory.dir('run')
+            systemProperty 'forge.logging.console.level', 'debug'
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
+
+            // Note: Mixin configs are usually handled by the 'mixin' block or jar manifest,
+            // but keeping these here for dev-run support as per your config.
+            args "--mixin.config=${mod_id}.common.mixins.json,${mod_id}.forge.mixins.json"
         }
-        client {
-            args '--username', 'Dev'
+
+        register('client') {
+            systemProperty 'forge.enabledGameTestNamespaces', mod_id
         }
-        server {
+
+        register('server') {
+            systemProperty 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
         }
-        data {
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+        register('data') {
+            workingDir = layout.projectDirectory.dir('run-data')
+            args '--mod', mod_id, '--all', '--output', layout.projectDirectory.dir('src/generated/resources'), '--existing', layout.projectDirectory.dir('src/main/resources')
         }
     }
 }
 
 repositories {
-    maven { url = 'https://maven.bawnorton.com/releases' }
+    maven { name = 'Bawnorton'; url = 'https://maven.bawnorton.com/releases' }
+
+    // Built-in Forge/Minecraft helpers
+    maven minecraft.mavenizer
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+
+    mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation("io.github.llamalad7:mixinextras-common:${mixinextras_version}")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}")
-    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:${mixinsquared_version}"))
-    implementation(jarJar("com.github.bawnorton.mixinsquared:mixinsquared-forge:${mixinsquared_version}"))
+    // 1. Core
+    implementation project(':common')
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
+
+    // 2. Mixin Extras & Squared
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+    implementation("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")
+
+    implementation("com.github.bawnorton.mixinsquared:mixinsquared-forge:${mixinsquared_version}")
+    annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:${mixinsquared_version}")
+
+    // 3. Utilities (Lombok)
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

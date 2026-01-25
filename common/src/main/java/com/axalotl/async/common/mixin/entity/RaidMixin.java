@@ -13,16 +13,16 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 @Mixin(Raid.class)
 public class RaidMixin {
 
+    @Unique
+    private static final Object async$lock = new Object();
+
     @Shadow
     private final Map<Integer, Set<Raider>> groupRaiderMap = ConcurrentCollections.newHashMap();
-    @Unique
-    private static final ReentrantLock async$lock = new ReentrantLock();
 
     @WrapMethod(method = "addWaveMob(ILnet/minecraft/world/entity/raid/Raider;)Z")
     private boolean addWaveMob(int wave, Raider entity, Operation<Boolean> original) {

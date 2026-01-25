@@ -1,4 +1,4 @@
-package com.axalotl.async.common.mixin.entity;
+package com.axalotl.async.common.mixin.entity.movement;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -14,14 +14,14 @@ import org.spongepowered.asm.mixin.Unique;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Mixin(PoiManager.class)
 public class PoiManagerMixin {
+
     @Unique
-    private static final ReentrantLock async$lock = new ReentrantLock();
+    private static final Object async$lock = new Object();
 
     @WrapMethod(method = "getInSquare")
     private Stream<PoiRecord> getInSquare(Predicate<RegistryAccess.RegistryEntry<PoiType>> typePredicate, BlockPos pos, int radius, PoiManager.Occupancy occupationStatus, Operation<Stream<PoiRecord>> original) {
