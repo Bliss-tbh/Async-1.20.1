@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "com.axalotl.async.forge.mixin",
   "compatibilityLevel": "JAVA_17",
+  "refmap": "async.refmap.json",
   "mixins": [
     "server.ServerWatchdogMixin",
     "world.ForgeBlockMixin",
