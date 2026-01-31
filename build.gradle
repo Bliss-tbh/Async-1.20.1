@@ -1,7 +1,7 @@
 plugins {
-    id 'fabric-loom' version '1.14-SNAPSHOT' apply false
+    id 'fabric-loom' version '1.15-SNAPSHOT' apply false
 
-    id 'net.minecraftforge.gradle' version '7.0.0-rc.2' apply false
+    id 'net.minecraftforge.gradle' version '7.0.0' apply false
 
     id 'net.minecraftforge.jarjar' version '0.2.3' apply false
 

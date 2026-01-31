@@ -9,8 +9,8 @@ base {
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(java_version)
-    withSourcesJar()
-    withJavadocJar()
+    //withSourcesJar()
+    //withJavadocJar()
 }
 
 repositories {
@@ -44,12 +44,6 @@ repositories {
     }
 }
 
-sourcesJar {
-    from(rootProject.file('LICENSE')) {
-        rename { "${it}_${mod_name}" }
-    }
-}
-
 jar {
     from(rootProject.file('LICENSE')) {
         rename { "${it}_${mod_name}" }
@@ -75,7 +69,7 @@ processResources {
             'group'                        : project.group, //Else we target the task's group.
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,
-            'fabric_api_version'           : fabric_api_version,
+            'fabric_version'               : fabric_version,
             'fabric_loader_version'        : fabric_loader_version,
             'mod_name'                     : mod_name,
             'mod_authors'                  : mod_authors,
