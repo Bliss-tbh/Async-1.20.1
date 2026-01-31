@@ -14,12 +14,9 @@ println "Java: ${providers.systemProperty('java.version').get()}, " +
         "Arch: ${providers.systemProperty('os.arch').get()}"
 
 minecraft {
-    mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}"
+    mappings channel: 'parchment', version: "${parchment_version}-${parchment_minecraft}"
 
-    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
-    if (at.exists()) {
-        accessTransformer = at.absolutePath
-    }
+    accessTransformer = "../../../../common/src/main/resources/META-INF/accesstransformer.cfg"
 
     runs {
         configureEach {
@@ -82,3 +79,5 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+idea.module { downloadJavadoc = downloadSources = true }

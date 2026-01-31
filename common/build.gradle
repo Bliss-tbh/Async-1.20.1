@@ -1,4 +1,5 @@
 plugins {
+    id 'idea'
     id 'java'
     id 'net.minecraftforge.accesstransformers'
     id 'net.minecraftforge.gradle'
@@ -10,7 +11,7 @@ java.toolchain.vendor = JvmVendorSpec.GRAAL_VM
 
 minecraft {
     accessTransformer = true
-    mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}"
+    mappings channel: 'parchment', version: "${parchment_version}-${parchment_minecraft}"
 
     // Logic for finding the Access Transformer
     //def at = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -63,3 +64,5 @@ artifacts {
     commonJava sourceSets.main.java.sourceDirectories.singleFile
     commonResources sourceSets.main.resources.sourceDirectories.singleFile
 }
+
+idea.module { downloadJavadoc = downloadSources = true }

@@ -5,6 +5,7 @@ import com.axalotl.async.common.config.AsyncConfig;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.server.level.*;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.ChunkPos;

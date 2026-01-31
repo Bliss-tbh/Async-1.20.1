@@ -1,7 +1,6 @@
 package com.axalotl.async.common;
 
 import com.axalotl.async.common.config.AsyncConfig;
-import com.axalotl.async.common.platform.PlatformInitializer;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.server.MinecraftServer;
@@ -23,7 +22,6 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.LockSupport;
 
 public class ParallelProcessor {
     public static final Logger LOGGER = LogManager.getLogger(ParallelProcessor.class);
@@ -34,8 +32,8 @@ public class ParallelProcessor {
 
     public static AtomicInteger currentEntities = new AtomicInteger();
     private static final AtomicInteger threadPoolID = new AtomicInteger();
-    public static ExecutorService tickPool;
-    public static final BlockingQueue<CompletableFuture<?>> taskQueue = new LinkedBlockingQueue<>();
+    public static ForkJoinPool tickPool;
+    public static final ConcurrentLinkedQueue<CompletableFuture<?>> taskQueue = new ConcurrentLinkedQueue<>();
     private static final Set<UUID> blacklistedEntity = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, Integer> portalTickSyncMap = new ConcurrentHashMap<>();
     private static final Map<String, Set<WeakReference<Thread>>> mcThreadTracker = new ConcurrentHashMap<>();
@@ -147,7 +145,7 @@ public class ParallelProcessor {
     }
 
     private static boolean isPortalTickRequired(Entity entity) {
-        return entity.isInsidePortal;
+        return entity.isInsidePortal; //TODO: AT
     }
 
     private static void tickSynchronously(ServerLevel world, Entity entity) {
@@ -167,92 +165,137 @@ public class ParallelProcessor {
         }
     }
 
+    public static Object getEntityAddLock() {
+        return ENTITY_ADD_LOCK;
+    }
+
     public static void asyncSpawnForChunk(
             ServerLevel level,
             LevelChunk chunk,
             NaturalSpawner.SpawnState spawnState,
             boolean spawnAnimals, boolean spawnMonsters, boolean rareSpawn)
     {
-        if (!chunk.loaded) {
+        if (!chunk.loaded) { //TODO: AT
             return;
         }
 
-        if (!AsyncConfig.disabled.getValue() && AsyncConfig.enableAsyncSpawn.getValue()) {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
-                    NaturalSpawner.spawnForChunk(level, chunk, spawnState, spawnAnimals, spawnMonsters, rareSpawn), ParallelProcessor.tickPool
-            ).exceptionally(e -> {
-                ParallelProcessor.LOGGER.error("Error in async spawn spawn, switching to synchronous", e);
-                NaturalSpawner.spawnForChunk(level, chunk, spawnState, spawnAnimals, spawnMonsters, rareSpawn);
-                return null;
-            });
-            taskQueue.add(future);
-        } else {
+        if (isShuttingDown || AsyncConfig.disabled.getValue() || !AsyncConfig.enableAsyncSpawn.getValue()) {
             NaturalSpawner.spawnForChunk(level, chunk, spawnState, spawnAnimals, spawnMonsters, rareSpawn);
+            return;
         }
+
+        if (!spawnAnimals && !spawnMonsters && !rareSpawn) {
+            return;
+        }
+
+        //TODO: I might be schitzo but spawnState might also need to be copied cause concurrency or sum shi. bool may also need copy but we ball
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
+                NaturalSpawner.spawnForChunk(level, chunk, spawnState, spawnAnimals, spawnMonsters, rareSpawn), tickPool
+        ).exceptionally(e -> {
+            LOGGER.error("Error in async spawn for chunk {}: {}", chunk.getPos(), e.getMessage());
+            return null;
+        });
+
+        taskQueue.add(future);
     }
 
     public static void asyncDespawn(Entity entity) {
-        if (!AsyncConfig.disabled.getValue() && AsyncConfig.enableAsyncSpawn.getValue()) {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(entity::checkDespawn, tickPool
-            ).exceptionally(e -> {
-                LOGGER.error("Error in async spawn tick, switching to synchronous", e);
-                entity.checkDespawn();
-                return null;
-            });
-            taskQueue.add(future);
-        } else {
+        if (isShuttingDown || AsyncConfig.disabled.getValue() || !AsyncConfig.enableAsyncSpawn.getValue()) {
             entity.checkDespawn();
+            return;
         }
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(
+                entity::checkDespawn, tickPool
+        ).exceptionally(e -> {
+            LOGGER.error("Error in async spawn tick, switching to synchronous", e);
+            entity.checkDespawn();
+            return null;
+        });
+
+        taskQueue.add(future);
+    }
+
+    public static void addTask(CompletableFuture<?> future) {
+        taskQueue.add(future);
     }
 
     public static void postEntityTick() {
         if (!AsyncConfig.disabled.getValue()) return;
-        List<CompletableFuture<?>> futuresList = new ArrayList<>();
+
+        List<CompletableFuture<?>> entityTasks = new ArrayList<>();
         CompletableFuture<?> future;
         while ((future = taskQueue.poll()) != null) {
-            futuresList.add(future);
+            entityTasks.add(future);
         }
 
-        CompletableFuture<?> allTasks = CompletableFuture.allOf(
-                futuresList.toArray(new CompletableFuture[0])
+        List<CompletableFuture<?>> spawnTasks = new ArrayList<>();
+        CompletableFuture<Void> spawnFuture;
+        while ((spawnFuture = spawnQueue.poll()) != null) {
+            spawnTasks.add(spawnFuture);
+        }
+
+        List<CompletableFuture<?>> allTasks = new ArrayList<>(entityTasks.size() + spawnTasks.size());
+        allTasks.addAll(entityTasks);
+        allTasks.addAll(spawnTasks);
+
+        if (allTasks.isEmpty()) {
+            return;
+        }
+
+        CompletableFuture<Void> allTasksFuture = CompletableFuture.allOf(
+                allTasks.toArray(new CompletableFuture[0])
         );
 
-        allTasks.exceptionally(ex -> {
-            Throwable cause = ex instanceof java.util.concurrent.CompletionException
-                    ? ex.getCause() : ex;
-            LOGGER.error("Error during entity tick processing: ", cause);
-            return null;
-        });
-
-        while (!allTasks.isDone()) {
-            boolean hasTask = false;
+        while (!allTasksFuture.isDone()) {
+            boolean didWork = false;
             for (ServerLevel world : server.getAllLevels()) {
-                hasTask |= world.getChunkSource().pollTask();
+                didWork |= world.getChunkSource().pollTask();
             }
-            if (!hasTask) {
-                LockSupport.parkNanos(50_000);
+
+            if (!didWork) {
+                Thread.onSpinWait();
             }
         }
 
-        server.getAllLevels().forEach(world -> {
-           world.getChunkSource().pollTask();
-           world.getChunkSource().mainThreadProcessor.managedBlock(allTasks::isDone);
-        });
+        for (ServerLevel world : server.getAllLevels()) {
+            world.getChunkSource().pollTask();
+        }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void stop() {
+        isShuttingDown = true;
+
+        List<CompletableFuture<?>> remaining = new ArrayList<>();
+        CompletableFuture<?> f;
+        while ((f = taskQueue.poll()) != null) {
+            remaining.add(f);
+        }
+        CompletableFuture<Void> sf;
+        while ((sf = spawnQueue.poll()) != null) {
+            remaining.add(sf);
+        }
+
+        if (!remaining.isEmpty()) {
+            CompletableFuture.allOf(remaining.toArray(new CompletableFuture[0])).join();
+        }
+
         if (tickPool != null) {
-            LOGGER.info("Waiting for Async tickPool to shutdown...");
             tickPool.shutdown();
-            try {
-                tickPool.awaitTermination(60L, TimeUnit.SECONDS);
-            } catch (InterruptedException ignored) {
+            boolean quiesced = tickPool.awaitQuiescence(10, TimeUnit.SECONDS);
+            if (!quiesced) {
+                LOGGER.warn("The pool did not stop in time! Forcing shutdown...");
+                tickPool.shutdownNow();
             }
         }
+
+        AsyncConfig.clearCaches();
+        blacklistedEntity.clear();
+        portalTickSyncMap.clear();
     }
 
     private static void logEntityError(String message, Entity entity, Throwable e) {
-        LOGGER.error("{} Entity Type: {}, UUID: {}", message, entity.getType().getDescription(), entity.getUUID(), e);
+        LOGGER.error("{} Entity Type: {}, UUID: {}", message, entity.getType().toString(), entity.getUUID(), e);
     }
 }
