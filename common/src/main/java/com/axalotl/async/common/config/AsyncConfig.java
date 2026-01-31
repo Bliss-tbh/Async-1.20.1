@@ -1,8 +1,9 @@
 package com.axalotl.async.common.config;
 
+import com.axalotl.async.common.commands.AsyncCommand;
 import com.axalotl.async.common.parallelised.utils.ModCompatibility;
 import com.axalotl.async.common.platform.PlatformUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AsyncConfig {
     public static final Logger LOGGER = LoggerFactory.getLogger("Async Config");
 
+    //TODO: should probably get the values before so we don't spam .getValue() but shouldn't impact perf that much riggggghhtt??!?!?!?!??!!?!?!?!
     public static Map.Entry<String, Boolean> disabled = new AbstractMap.SimpleEntry<>("disabled", false);
     public static Map.Entry<String, Integer> maxThreads = new AbstractMap.SimpleEntry<>("paraMax", -1);
     public static Map.Entry<String, Boolean> enableAsyncSpawn = new AbstractMap.SimpleEntry<>("enableAsyncSpawn", true);
@@ -49,17 +51,17 @@ public class AsyncConfig {
         return input.substring(colon + 1).equals("*");
     }
 
-    public static boolean existsNamespace(String namespace) {
-        for (ResourceLocation id : BuiltInRegistries.ENTITY_TYPE.keySet()) {
+    public static boolean existsNamespace(String namespace, CommandSourceStack source) {
+        for (ResourceLocation id : AsyncCommand.getEntityAccess(source).keySet()) {
             if (id.getNamespace().equals(namespace)) return true;
         }
         return false;
     }
 
-    public static boolean matchesExistingNamespaceWildcard(String input) {
+    public static boolean matchesExistingNamespaceWildcard(String input, CommandSourceStack source) {
         if (!isNamespaceWildcard(input)) return false;
         String ns = input.substring(0, input.indexOf(':'));
-        return existsNamespace(ns);
+        return existsNamespace(ns, source);
     }
 
     public static void syncEntity(String entity) {

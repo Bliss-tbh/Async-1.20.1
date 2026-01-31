@@ -12,6 +12,7 @@ public class PlatformUtils {
         PlatformUtils.minecraftPlatform = PlatformUtils.load(MinecraftPlatform.class);
     }
 
+    //unused (explosions might need to use this)
     public static boolean platformUsesRefmap() {
         return MOD_PLATFORM.platformUsesRefmap();
     }

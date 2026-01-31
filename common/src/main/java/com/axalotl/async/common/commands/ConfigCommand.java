@@ -1,6 +1,5 @@
 package com.axalotl.async.common.commands;
 
-import com.axalotl.async.common.ParallelProcessor;
 import com.axalotl.async.common.config.AsyncConfig;
 import com.axalotl.async.common.platform.Permission;
 import com.axalotl.async.common.platform.PlatformUtils;
@@ -11,13 +10,10 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.world.entity.EntityType;
 import java.util.Set;
 import static com.axalotl.async.common.commands.AsyncCommand.prefix;
 import static net.minecraft.commands.Commands.literal;
@@ -82,7 +78,7 @@ public class ConfigCommand {
         return literal("add")
                 .then(Commands.argument("entity", ResourceLocationArgument.id())
                         .suggests((context, builder) -> {
-                            var entityAccess = ParallelProcessor.getEntityAccess(context.getSource());
+                            var entityAccess = AsyncCommand.getEntityAccess(context.getSource());
 
                             entityAccess.keySet().forEach(
                                     id -> builder.suggest(id.toString())
@@ -194,7 +190,7 @@ public class ConfigCommand {
 
     private static void addEntity(CommandContext<CommandSourceStack> ctx) {
         ResourceLocation id = ResourceLocationArgument.getId(ctx, "entity");
-        var entityAccess = ParallelProcessor.getEntityAccess(ctx.getSource());
+        var entityAccess = AsyncCommand.getEntityAccess(ctx.getSource());
 
         if (!entityAccess.containsKey(id)) {
             sendErrorMessage(ctx, "Error entity class ", id.toString(), " does not exist.");
@@ -214,7 +210,7 @@ public class ConfigCommand {
     private static void addNamespace(CommandContext<CommandSourceStack> ctx) {
         String namespace = StringArgumentType.getString(ctx, "namespace");
 
-        if (AsyncConfig.matchesExistingNamespaceWildcard(namespace)) {
+        if (AsyncConfig.matchesExistingNamespaceWildcard(namespace, ctx.getSource())) {
             AsyncConfig.syncEntity(namespace);
             sendMessage(ctx, "All entities with namespace ", namespace,
                     " has been added to the synchronized list.");

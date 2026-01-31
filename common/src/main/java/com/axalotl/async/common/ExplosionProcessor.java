@@ -10,7 +10,6 @@ public class ExplosionProcessor {
     public record ExplosionTask(Explosion explosion, boolean spawnParticles) {
     }
 
-    private static final Logger LOGGER = ParallelProcessor.LOGGER;
     private static final BlockingQueue<ExplosionTask> workQueue = new LinkedBlockingQueue<>();
     private static volatile boolean running = false;
     private static Thread workerThread;
@@ -58,5 +57,5 @@ public class ExplosionProcessor {
         }
     }
 
-    //TODO: this necessary? should probably implement this in parallel processor.
+    //TODO: this necessary? should probably implement this in parallel processor. Remember the mixin for finalize explosion are f-ed by forge
 }

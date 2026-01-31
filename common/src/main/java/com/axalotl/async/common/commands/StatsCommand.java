@@ -162,7 +162,7 @@ public class StatsCommand {
                             int count = entry.getValue();
                             boolean isAsync = entityTypeAsync.getOrDefault(type, false);
 
-                            ResourceLocation id = ParallelProcessor.getEntityAccess(source).getKey(type);
+                            ResourceLocation id = AsyncCommand.getEntityAccess(source).getKey(type);
                             String name = id.getPath(); //TODO: nullpointerexception warning scary jumpscare
 
                             message.append(Component.literal("\n" + rank[0] + ". ").withStyle(ChatFormatting.GRAY))
