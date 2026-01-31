@@ -3,11 +3,11 @@ plugins {
     id 'net.minecraftforge.accesstransformers'
     id 'net.minecraftforge.gradle'
     id 'net.minecraftforge.jarjar'
-    //id 'java-library'
+    id 'java-library'
     id 'idea'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
 
 println "Java: ${providers.systemProperty('java.version').get()}, " +
         "JVM: ${providers.systemProperty('java.vm.version').get()} (${providers.systemProperty('java.vendor').get()}), " +
@@ -59,8 +59,8 @@ repositories {
 
 dependencies {
     // 1. Core
-    implementation project(':common')
-    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
+    //implementation project(':common')
+    implementation minecraft.dependency("net.minecraftforge:forge:$minecraft_version-$forge_version")
 
     // 2. Mixin Extras & Squared
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))

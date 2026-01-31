@@ -14,12 +14,11 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.server.permission.events.PermissionGatherEvent;
+import org.slf4j.Logger;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.server.permission.events.PermissionGatherEvent;
-import org.slf4j.Logger;
-
 import static com.axalotl.async.common.config.AsyncConfig.getParallelism;
 import static com.axalotl.async.forge.config.AsyncConfigForge.SPEC;
 import static com.axalotl.async.forge.config.AsyncConfigForge.loadConfig;

@@ -1,8 +1,12 @@
 package com.axalotl.async.common;
 
 import com.axalotl.async.common.config.AsyncConfig;
+import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -83,6 +87,12 @@ public class ParallelProcessor {
 
     public static boolean isServerExecutionThread() {
         return isThreadInPool(Thread.currentThread());
+    }
+
+    public static Registry<EntityType<?>> getEntityAccess(CommandSourceStack source) {
+        return source
+                .registryAccess()
+                .registryOrThrow(Registries.ENTITY_TYPE);
     }
 
     public static void callEntityTick(ServerLevel world, Entity entity) {

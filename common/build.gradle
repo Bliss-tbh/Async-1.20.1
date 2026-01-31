@@ -6,8 +6,7 @@ plugins {
     id 'net.minecraftforge.jarjar'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-java.toolchain.vendor = JvmVendorSpec.GRAAL_VM
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
 
 minecraft {
     accessTransformer = true
