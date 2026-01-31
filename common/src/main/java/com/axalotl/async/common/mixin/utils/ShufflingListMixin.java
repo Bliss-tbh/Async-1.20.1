@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mixin(ShufflingList.class)
 public abstract class ShufflingListMixin<U> implements Iterable<U> {
+
     @Shadow
     protected final List<ShufflingList.WeightedEntry<U>> entries = new CopyOnWriteArrayList<>();
 }
