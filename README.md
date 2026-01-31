@@ -43,7 +43,7 @@ Concurrent Chunk Management Engine, Fabric API, FerriteCore, Lithium, ScalableLu
 ## ⚠️ Incompatible Mods (1.20.1)
 - ⚠️ If you find an incompatible mod for 1.20.1 report it to ME not AxolotL. 
 
-*If you encounter issues with other mods, please report them on my [![Report issues on my GitHub](https://img.shields.io/badge/Report%20issues%20on-GitHub-lightgrey)](https://github.com/Bliss-tbh/Async-1.20.1/issues).*
+*If you encounter issues with other mods, please report them on my [GitHub](https://github.com/Bliss-tbh/Async-1.20.1/issues).*
 
 ## 🔧 Commands
 - `/async config toggle` — Enables or disables the mod in-game (no server restart required). Use this command to instantly see how Async improves your server.
