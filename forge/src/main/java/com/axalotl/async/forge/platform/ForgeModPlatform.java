@@ -24,6 +24,6 @@ public class ForgeModPlatform implements ModPlatform {
 
     @Override
     public boolean platformUsesRefmap() {
-        return false;
+        return true; // i think the pull request from storm changes this idk it ain't used tho
     }
 }

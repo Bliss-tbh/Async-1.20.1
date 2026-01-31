@@ -1,8 +1,5 @@
 package com.axalotl.async.common;
 
-import com.axalotl.async.common.mixin.world.ExplosionAccessor;
-import com.axalotl.async.common.platform.PlatformEvents;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Explosion;
 import org.apache.logging.log4j.Logger;
 
@@ -17,7 +14,6 @@ public class ExplosionProcessor {
     private static final BlockingQueue<ExplosionTask> workQueue = new LinkedBlockingQueue<>();
     private static volatile boolean running = false;
     private static Thread workerThread;
-    private static final boolean fabric = PlatformEvents.getInstance().isFabric();
 
     public static void start() {
         if (running) {
@@ -49,16 +45,18 @@ public class ExplosionProcessor {
 
                 // Do the heavy work on this async thread
                 task.explosion().explode();
-                if (fabric) {
-                    task.explosion().finalizeExplosion(task.spawnParticles());
-                } else {
-                    ServerLevel level = (ServerLevel) ((ExplosionAccessor)task.explosion()).getLevel();
-                    level.getServer().execute(() -> task.explosion().finalizeExplosion(task.spawnParticles()));
-                }
+                //if (fabric) {
+                task.explosion().finalizeExplosion(task.spawnParticles());
+                //} else {
+                //    ServerLevel level = (ServerLevel) ((ExplosionAccessor)task.explosion()).getLevel();
+                //    level.getServer().execute(() -> task.explosion().finalizeExplosion(task.spawnParticles()));
+                //}
             } catch (InterruptedException e) {
                 // Expected on shutdown, just exit the loop.
                 break;
             }
         }
     }
+
+    //TODO: this necessary? should probably implement this in parallel processor.
 }

@@ -38,10 +38,10 @@ public class AsyncConfigForge {
                         obj -> obj instanceof String
                 );
 
-        enableAsyncSpawnLocal = BUILDER.comment("Enables parallel processing of entity spawns.")
+        enableAsyncSpawnLocal = BUILDER.comment("Enables async entity spawning. WARNING: incompatible with Carpet's lagFreeSpawning.")
                 .define(enableAsyncSpawn.getKey(), enableAsyncSpawn.getValue());
 
-        enableAsyncRandomTicksLocal = BUILDER.comment("Experimental! Enables async processing of random ticks.")
+        enableAsyncRandomTicksLocal = BUILDER.comment("Experimental! Enables async random ticks.")
                 .define(enableAsyncRandomTicks.getKey(), enableAsyncRandomTicks.getValue());
 
         BUILDER.pop();

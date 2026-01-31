@@ -11,26 +11,23 @@ import net.minecraftforge.server.permission.nodes.PermissionTypes;
 public class ForgeMinecraftPlatform implements MinecraftPlatform {
     @Override
     public boolean hasPermission(CommandSourceStack source, String node, int level) {
-        if (source.hasPermission(level)) {
-            return true;
-        }
-
         ServerPlayer player = source.getPlayer();
-        PermissionNode<Boolean> permission = null;
 
-        for (PermissionNode<?> thisnode : PermissionAPI.getRegisteredNodes()) {
-            if (thisnode.getNodeName().equals(node)) {
-                if (thisnode.getType() == PermissionTypes.BOOLEAN) {
-                    permission = (PermissionNode<Boolean>) thisnode;
-                }
-            }
+        if (player == null) {
+            return source.hasPermission(level);
         }
 
-        if (player == null || permission == null) {
-            return false;
+        PermissionNode<Boolean> permission = PermissionAPI.getRegisteredNodes().stream()
+                .filter(n -> n.getNodeName().equals(node))
+                .filter(n -> n.getType() == PermissionTypes.BOOLEAN)
+                .map(n -> (PermissionNode<Boolean>) n)
+                .findFirst()
+                .orElse(null);
+
+        if (permission != null) {
+            return PermissionAPI.getPermission(player, permission);
         }
 
-        return PermissionAPI.getPermission(player, permission);
+        return source.hasPermission(level);
     }
-
 }

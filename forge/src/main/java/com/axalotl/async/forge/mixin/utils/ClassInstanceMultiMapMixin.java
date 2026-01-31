@@ -5,14 +5,9 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.util.ClassInstanceMultiMap;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Mixin(value = ClassInstanceMultiMap.class, priority = Integer.MIN_VALUE)
@@ -30,6 +25,7 @@ public abstract class ClassInstanceMultiMapMixin<T> extends AbstractCollection<T
     @Shadow @Final
     private Class<T> baseClass;
 
+    //TODO: check if casts are necessary
     /**
      * @author prydaran
      * @reason overwriting at highest priority (Integer.MIN_VALUE) should function identically to a @ModifyArg, with the exception being we are now the base implementation.

@@ -39,6 +39,14 @@ public class ParallelProcessor {
     private static final Set<UUID> blacklistedEntity = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, Integer> portalTickSyncMap = new ConcurrentHashMap<>();
     private static final Map<String, Set<WeakReference<Thread>>> mcThreadTracker = new ConcurrentHashMap<>();
+
+    private static volatile boolean isShuttingDown = false;
+
+    // ========== PARALLEL SPAWN SYSTEM ==========
+
+    private static final Object ENTITY_ADD_LOCK = new Object();
+    private static final ConcurrentLinkedQueue<CompletableFuture<Void>> spawnQueue = new ConcurrentLinkedQueue<>();
+
     public static final Set<Class<?>> BLOCKED_ENTITIES = Set.of(
             FallingBlockEntity.class,
             Shulker.class,
@@ -46,6 +54,8 @@ public class ParallelProcessor {
     );
 
     public static void setupThreadPool(int parallelism, Class<?> asyncClass) {
+        isShuttingDown = false;
+
         ForkJoinPool.ForkJoinWorkerThreadFactory tickThreadFactory = pool -> {
             ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             worker.setName("Async-Tick-Pool-Thread-" + threadPoolID.getAndIncrement());
@@ -58,7 +68,7 @@ public class ParallelProcessor {
 
         tickPool = new ForkJoinPool(parallelism, tickThreadFactory, (t, e) ->
                 LOGGER.error("Uncaught exception in thread {}: {}", t.getName(), e), true);
-        LOGGER.info("Initialized ForkJoinPool with {} threads", parallelism);
+        LOGGER.info("Initialized Pool with {} threads", parallelism);
     }
 
     public static void registerThread(String poolName, Thread thread) {
@@ -78,6 +88,11 @@ public class ParallelProcessor {
     }
 
     public static void callEntityTick(ServerLevel world, Entity entity) {
+        if (isShuttingDown) {
+            tickSynchronously(world, entity);
+            return;
+        }
+
         if (shouldTickSynchronously(entity)) {
             tickSynchronously(world, entity);
         } else {
@@ -86,13 +101,11 @@ public class ParallelProcessor {
                         performAsyncEntityTick(world, entity), tickPool
                 ).exceptionally(e -> {
                     logEntityError("Error in async tick, switching to synchronous", entity, e);
-                    tickSynchronously(world, entity);
                     blacklistedEntity.add(entity.getUUID());
                     return null;
                 });
                 taskQueue.add(future);
             } else {
-                logEntityError("Rejected task due to ExecutorService shutdown", entity, null);
                 tickSynchronously(world, entity);
             }
         }
@@ -154,7 +167,16 @@ public class ParallelProcessor {
         }
     }
 
-    public static void asyncSpawnForChunk(ServerLevel level, LevelChunk chunk, NaturalSpawner.SpawnState spawnState, boolean spawnAnimals, boolean spawnMonsters, boolean rareSpawn) {
+    public static void asyncSpawnForChunk(
+            ServerLevel level,
+            LevelChunk chunk,
+            NaturalSpawner.SpawnState spawnState,
+            boolean spawnAnimals, boolean spawnMonsters, boolean rareSpawn)
+    {
+        if (!chunk.loaded) {
+            return;
+        }
+
         if (!AsyncConfig.disabled.getValue() && AsyncConfig.enableAsyncSpawn.getValue()) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
                     NaturalSpawner.spawnForChunk(level, chunk, spawnState, spawnAnimals, spawnMonsters, rareSpawn), ParallelProcessor.tickPool

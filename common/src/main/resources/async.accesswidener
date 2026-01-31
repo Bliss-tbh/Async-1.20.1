@@ -34,3 +34,4 @@ accessible method net/minecraft/server/level/ChunkMap addEntity (Lnet/minecraft/
 accessible method net/minecraft/server/level/ChunkMap removeEntity (Lnet/minecraft/world/entity/Entity;)V
 accessible field net/minecraft/world/entity/Entity isInsidePortal Z
 accessible class net/minecraft/world/entity/animal/Fox$FoxBreedGoal
+accessible field net/minecraft/world/level/chunk/LevelChunk loaded Z

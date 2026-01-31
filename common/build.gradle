@@ -8,13 +8,14 @@ plugins {
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
+    accessTransformer = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg').absolutePath
     mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}"
 
     // Logic for finding the Access Transformer
-    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
-    if (at.exists()) {
-        setAccessTransformer('../../../../common/src/main/resources/META-INF/accesstransformer.cfg')
-    }
+    //def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    //if (at.exists()) {
+    //    setAccessTransformer('../../../../common/src/main/resources/META-INF/accesstransformer.cfg')
+    //}
 }
 
 repositories {
@@ -61,4 +62,14 @@ configurations {
 artifacts {
     commonJava sourceSets.main.java.sourceDirectories.singleFile
     commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}
+
+afterEvaluate {
+    configurations.matching { it.name.startsWith('downloadArtifact_') }.configureEach {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'net.minecraft' && details.requested.name == 'joined') {
+                details.useTarget("net.minecraft:joined:${details.requested.version}:sources")
+            }
+        }
+    }
 }

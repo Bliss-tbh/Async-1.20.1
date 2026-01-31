@@ -13,9 +13,9 @@ minecraft {
     mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}"
 
     // Use the common access transformer if it exists
-    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        setAccessTransformer('../../../../common/src/main/resources/META-INF/accesstransformer.cfg')
+        setAccessTransformer(at.absolutePath)
     }
 
     runs {

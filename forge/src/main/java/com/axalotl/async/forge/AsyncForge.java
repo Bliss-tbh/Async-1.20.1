@@ -26,7 +26,6 @@ import static com.axalotl.async.forge.config.AsyncConfigForge.loadConfig;
 
 @Mod(AsyncForge.MOD_ID)
 public class AsyncForge extends AsyncCommon {
-
     public static final String MOD_ID = "async";
     public static final Logger LOGGER = LogUtils.getLogger();
 

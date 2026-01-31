@@ -1,15 +1,10 @@
 package com.axalotl.async.forge.mixin.utils;
 
 import com.axalotl.async.common.ParallelProcessor;
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 
@@ -31,7 +26,7 @@ public abstract class UtilMixin {
             boolean asyncMode,
             String serviceName
     ) {
-        ForkJoinPool newPool = new ForkJoinPool(
+        return new ForkJoinPool(
                 parallelism,
                 runnable -> {
                     ForkJoinWorkerThread thread = factory.newThread(runnable);
@@ -41,6 +36,5 @@ public abstract class UtilMixin {
                 handler,
                 asyncMode
         );
-        return newPool;
     }
 }

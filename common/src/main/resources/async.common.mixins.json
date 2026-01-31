@@ -31,7 +31,6 @@
     "entity.RaidMixin",
     "entity.SensingMixin",
     "entity.ShowTradesToPlayerMixin",
-    "entity.VillagerMixin",
     "entity.breed.AnimalMakeLoveMixin",
     "entity.breed.FoxBreedGoalMixin",
     "entity.breed.FrogMixin",
@@ -72,7 +71,9 @@
     "world.SectionStorageMixin",
     "world.ServerLevelMixin"
   ],
-  "client": [
+  "client": [],
+  "server": [
+    "entity.VillagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

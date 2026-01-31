@@ -6,7 +6,6 @@
   "refmap": "async.refmap.json",
   "mixins": [
     "server.ServerWatchdogMixin",
-    "world.ForgeBlockMixin",
     "utils.ClassInstanceMultiMapMixin",
     "utils.UtilMixin"
   ],
@@ -14,6 +13,5 @@
   "server": [],
   "injectors": {
     "defaultRequire": 1
-  },
-  "plugin": "com.axalotl.async.forge.mixin.utils.SynchronisePlugin"
+  }
 }
