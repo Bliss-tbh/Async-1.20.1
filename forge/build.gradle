@@ -3,19 +3,22 @@ plugins {
     id 'net.minecraftforge.accesstransformers'
     id 'net.minecraftforge.gradle'
     id 'net.minecraftforge.jarjar'
-    id 'java-library'
+    //id 'java-library'
     id 'idea'
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+println "Java: ${providers.systemProperty('java.version').get()}, " +
+        "JVM: ${providers.systemProperty('java.vm.version').get()} (${providers.systemProperty('java.vendor').get()}), " +
+        "Arch: ${providers.systemProperty('os.arch').get()}"
+
 minecraft {
     mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}"
 
-    // Use the common access transformer if it exists
     def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        setAccessTransformer(at.absolutePath)
+        accessTransformer = at.absolutePath
     }
 
     runs {

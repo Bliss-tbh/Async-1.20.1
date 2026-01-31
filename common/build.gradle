@@ -6,9 +6,10 @@ plugins {
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.vendor = JvmVendorSpec.GRAAL_VM
 
 minecraft {
-    accessTransformer = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg').absolutePath
+    accessTransformer = true
     mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}"
 
     // Logic for finding the Access Transformer
@@ -32,7 +33,6 @@ repositories {
 dependencies {
     // 1. Core Minecraft/Forge
     implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
-    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.10'
 
     // 2. Mixin Stack (Extras + Squared)
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
@@ -62,14 +62,4 @@ configurations {
 artifacts {
     commonJava sourceSets.main.java.sourceDirectories.singleFile
     commonResources sourceSets.main.resources.sourceDirectories.singleFile
-}
-
-afterEvaluate {
-    configurations.matching { it.name.startsWith('downloadArtifact_') }.configureEach {
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == 'net.minecraft' && details.requested.name == 'joined') {
-                details.useTarget("net.minecraft:joined:${details.requested.version}:sources")
-            }
-        }
-    }
 }
