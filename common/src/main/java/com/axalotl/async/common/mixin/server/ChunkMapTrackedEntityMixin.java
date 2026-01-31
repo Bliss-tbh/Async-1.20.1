@@ -24,7 +24,7 @@ public class ChunkMapTrackedEntityMixin {
 
     @Shadow
     @Final
-    public Entity entity;
+    Entity entity;
 
     @Inject(method = "updatePlayer(Lnet/minecraft/server/level/ServerPlayer;)V", at = @At("HEAD"), cancellable = true)
     private void updatePlayerNull(ServerPlayer player, CallbackInfo ci) {

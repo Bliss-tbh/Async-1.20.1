@@ -49,6 +49,7 @@
     "entity.spawn.LocalMobCapCalculatorMixin",
     "entity.spawn.NaturalSpawnerMixin",
     "entity.spawn.PotentialCalculatorMixin",
+    "server.ChunkHolderMixin",
     "server.ChunkMapMixin",
     "server.ChunkMapTrackedEntityMixin",
     "server.MinecraftServerMixin",
