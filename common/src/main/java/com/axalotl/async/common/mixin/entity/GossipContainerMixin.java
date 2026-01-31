@@ -11,5 +11,5 @@ import java.util.UUID;
 @Mixin(GossipContainer.class)
 public class GossipContainerMixin {
     @Shadow
-    private final Map<UUID, GossipContainer.EntityGossips> gossips = ConcurrentCollections.newHashMap();
+    private final Map<UUID, ?> gossips = ConcurrentCollections.newHashMap();
 }

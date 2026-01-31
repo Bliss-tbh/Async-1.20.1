@@ -2,10 +2,12 @@ package com.axalotl.async.common.mixin.entity;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -37,4 +39,16 @@ public class MobMixin {
     }
 
     //just uses set item slot in 1.20.1
+
+    @WrapMethod(method = "convertTo(Lnet/minecraft/world/entity/EntityType;Z)Lnet/minecraft/world/entity/Mob;")
+    private <T extends Mob> @Nullable T convertTo(
+            EntityType<T> entityType, boolean mysteryBool, Operation<T> original
+    ) {
+        synchronized (async$lock) {
+            if (((Mob)(Object)this).isRemoved()) {
+                return null;
+            }
+            return original.call(entityType, mysteryBool);
+        }
+    }
 }

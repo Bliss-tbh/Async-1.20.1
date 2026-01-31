@@ -2,6 +2,7 @@ package com.axalotl.async.common.mixin.entity;
 
 import net.minecraft.world.entity.ai.behavior.PlayTagWithOtherKids;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.injection.At;
