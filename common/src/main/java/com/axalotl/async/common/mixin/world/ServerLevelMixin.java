@@ -2,7 +2,10 @@ package com.axalotl.async.common.mixin.world;
 
 import com.axalotl.async.common.ExplosionProcessor;
 import com.axalotl.async.common.ParallelProcessor;
+import com.axalotl.async.common.config.AsyncConfig;
 import com.axalotl.async.common.parallelised.ConcurrentCollections;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -39,7 +42,7 @@ public abstract class ServerLevelMixin extends Level implements WorldGenLevel {
 
     @Shadow
     @Final
-    public EntityTickList entityTickList;
+    EntityTickList entityTickList;
 
     @Unique
     ConcurrentLinkedQueue<BlockEventData> async$syncedBlockEventQueue;
@@ -165,5 +168,16 @@ public abstract class ServerLevelMixin extends Level implements WorldGenLevel {
 
     @Redirect(method = "sendBlockUpdated", at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerLevel;isUpdatingNavigations:Z", opcode = Opcodes.PUTFIELD))
     private void skipSendBlockUpdatedCheck(ServerLevel instance, boolean value) {
+    }
+
+    @WrapMethod(method = "addFreshEntity")
+    private boolean wrapAddFreshEntity(Entity entity, Operation<Boolean> original) {
+        if (AsyncConfig.disabled.getValue() || !AsyncConfig.enableAsyncSpawn.getValue()) {
+            return original.call(entity);
+        }
+
+        synchronized (ParallelProcessor.getEntityAddLock()) {
+            return original.call(entity);
+        }
     }
 }
